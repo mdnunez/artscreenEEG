@@ -7,6 +7,7 @@
 %       egihc128 - newer 128 channel EGI hydrocell nets
 %       egihc256 - newer 256 channel EGI hydrocell nets
 %       egihc256red - newer 256 channel EGI hydrocell minus useless face electrodes
+%       eginn128 - newer 128 channel EGI hydrocell net with a few electrodes switched (specific usage for Human Neuroscience Lab)
 %       antwave - ANT waveguard caps
 %       ucsdeeg - eeg from the UCSD simultaneous EEG/MEG center
 %       ucsdmeg - meg from the UCSD simultaneous EEG/MEG center

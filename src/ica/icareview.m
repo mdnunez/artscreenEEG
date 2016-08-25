@@ -233,6 +233,17 @@ gtindex=[];
 %while sum(isnan(datain.compevals))>0;
 while exitnow==0;
     done=0;
+
+    if c>ncomps
+        exitnow=1;
+    end
+
+    % Close the figure when evaluation is complete
+    if exitnow;
+        set(thefig,'DeleteFcn','');
+        close(thefig); 
+        return; 
+    end;
     
     % Enable/Disable Buttons
     if c==1;
@@ -306,13 +317,8 @@ while exitnow==0;
     while done==0;
         pause(.05);
     end
-    
-    %if exitnow; datain=[]; return; end;
 end
 
-% Close the figure when evaluation is complete
-% set(thefig,'DeleteFcn','');
-% close(thefig);
 drawnow;
 
 

@@ -93,15 +93,10 @@ if isempty(ncomps);
     disp(['Solving for ' num2str(ncomps) ' components...']);
 end
 
-% % Keeps top 40 components. Smaller ones contribute insignificant variance
-% % for the most part
-% if isempty(nkeep);
-%     nkeep=min([40 ncomps]);
-% end
-
-% By default, keep as many components as possible
+% Keeps top 60 components. Smaller ones contribute insignificant variance
+% for the most part
 if isempty(nkeep);
-    nkeep=ncomps;
+    nkeep=min([60 ncomps]);
 end
 
 % Checks for bad inputs

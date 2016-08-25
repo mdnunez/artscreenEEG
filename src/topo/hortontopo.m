@@ -50,7 +50,7 @@
 %   nPixel - resolution of the plot (256)
 %   electrodeWidth - lower this for very high density recordings (.01)
 %
-% Copyright (C) 2005 Bill Winter, <wwinter@hs.uci.edu >
+% Copyright (C) 2006 Bill Winter, <wwinter@hs.uci.edu>
 % Copyright (C) 2007 Siyi Deng, <siyideng@live.com>
 % Copyright (C) 2013 Cort Horton, <chorton@uci.edu>
 % Copyright (C) 2016 Michael D. Nunez, <mdnunez1@uci.edu>
@@ -85,6 +85,7 @@ function HH = hortontopo(data,hm,varargin)
 %         plotting functions. Also now calls complextopo when it detects
 %         complex data. 7/14/13
 %   1.7 - Include color electrode indications - Michael Nunez on 7/01/14
+%   1.8 - Added dependencies - Michae Nunez on 8/25/16
 
 % Transposes data into column vector if needed
 if size(data,1)==1; data=data'; end;
@@ -439,6 +440,25 @@ if nargout>0; HH=H; end
 
     end % end of function PLANE2BALL;
 
+    function [x1,y1] = ball2plane(x,y,z)
+
+        %BALL2PLANE projects the coordinates from a ball to a plane.
+        %   [X1,Y1] = BALL2PLANE(X,Y,Z) uses the Azimuthal Equal-Distant projection
+        %   method to project X,Y,Z onto X1,Y1;
+        %
+        %   See also PLANE2BALL.
+
+        % Written by Siyi; 04-22-2007;
+
+        [t,p,r] = cart2sph(x,y,z);
+        p1 = min(p);
+        p2 = min(p(p~=p1));
+        angle = pi-p1-p2;
+        [x1,y1] = pol2cart(t,(pi/2-p)*max(r)*2/angle);
+
+    end % end of function BALL2PLANE;
+
+
     function vi = interpolate3d(xyzD,vd,xyzI,w)
         %INTERPOLATE3D 3-D spline interpolation;
         %   VI = INTERPOLATE3D([X,Y,Z],V,[XI,YI,ZI],W) uses min-region radius W, to
@@ -506,5 +526,62 @@ if nargout>0; HH=H; end
         mat(mat<length(mat)*eps(norm(mat))) = 0;
         mat(1:length(x)+1:numel(x)) = 0;
     end % end of function EUCDIST;
+
+    function out = discmask(n,d)
+
+        %DISCMASK creates a N x N square mask inscribed by a disc with diameter D.
+        %   M = DISCMASK(N, D)
+        %   M is a N x N matrix of 0, inscribed by a disc with value 1;
+        %   N should be equal to or larger than D; by default N equals D.
+        %
+        %   Example:
+        %       imagesc(discmask(131)); axis image;
+
+        % Written by Siyi Deng; 04-03-2007;
+
+        if nargin < 2, d = n; end;
+
+        % Generate the coordinate vectors x, y;
+        [x,y] = meshgrid(linspace(-n/2,n/2,n));
+
+        out = (x.^2+y.^2 < d*d/4);
+
+    end % DISCMASK;
+
+    function h = hotncold(m)
+        % h = hotncold(m)
+        %
+        % HOTNCOLD returns a colormap, cycling through white, cyan, blue, black,
+        % red, yellow, white.
+        %
+        % m: length of colormap.  default is length of current colormap
+        % h: mx3 rgb colormap
+        %
+        % See also: COLORMAP
+        % Written by Bill Winter, March 2006
+
+        if nargin < 1, m = size(get(gcf,'colormap'),1); end
+        h = symmap(hot(m),1); 
+    end % end of hotncold
+
+    % Written by Bill Winter, March 2006
+    function h = symmap(h,flip)
+        % h = symmap(map,flip)
+        %
+        % SYMMAP operates on a colormap 'map' and creates a symmetric map of equal
+        % length.  With 'flip' true, the red/blue components are reversed in the
+        % lower map, as in hotncold.
+        %
+        %  map: colormap.  default is current colormap
+        % flip: whether to flip the red/blue component in the lower half of the map
+        %
+        %    h: mx3 rgb colormap
+        %
+        % See also: COLORMAP, HOTNCOLD
+        if nargin < 1, h = colormap; end
+        if nargin < 2, flip = 0; end
+        h = [h(2*floor(end/2):-2:1,:);h(1:2:end,:)];
+        if flip, h(1:floor(end/2),[1 3]) = h(1:floor(end/2),[3 1]); end
+    end
 
 end % end of main function
