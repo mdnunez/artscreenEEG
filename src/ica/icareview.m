@@ -69,6 +69,7 @@ function datain = icareview(datain)
 %            replace the topo plot with a bar graph showing channel weights
 %     1.7 - No longer automatically classifies artifact, icareview now maintains 
 %           component evaluation labels if they exist. 8/23/16 - Michael
+%     1.8 - Added a 'Finished' button to Save & Exit. 8/29/16 - Michael
 
 if nargin < 1; help icareview; return; end;
 
@@ -185,16 +186,21 @@ uc11=uicontrol('style','pushbutton','units','norm','pos',[widthmod*15.5/30 .5/20
     'string','Show Trials','callback',@TrialView_callback,'enable','off');
 uc12=uicontrol('style','pushbutton','units','norm','pos',[widthmod*18.5/30 .5/20 2.5/30 .9/20],...
     'string','Show ERPs','callback',@ErpView_callback);
-uc13=uicontrol('style','pushbutton','units','norm','pos',[widthmod*25/30 .5/20 1/30 .9/20],...
+uc13=uicontrol('style','pushbutton','units','norm','pos',[widthmod*24/30 .5/20 1/30 .9/20],...
     'string','+','callback',@ScaleUp_callback);
-uc14=uicontrol('style','pushbutton','units','norm','pos',[widthmod*26.25/30 .5/20 1/30 .9/20],...
+uc14=uicontrol('style','pushbutton','units','norm','pos',[widthmod*25.25/30 .5/20 1/30 .9/20],...
     'string','-','callback',@ScaleDown_callback);
 
+% Finished button (the x works in the same way)
+uc15=uicontrol('style','pushbutton','units','norm','pos',[widthmod*27.25/30 .5/20 2.5/30 .9/20],...
+    'string','Finished','callback',@CloseFig_callback);
+
 if widthmod~=1
-    set(uc11,'pos',[19/30 .5/20 2.6/30 .9/20]);
-    set(uc12,'pos',[22/30 .5/20 2.6/30 .9/20]);
-    set(uc13,'pos',[26.35/30 .5/20 1/30 .9/20]);
-    set(uc14,'pos',[27.5/30 .5/20 1/30 .9/20]);
+    set(uc11,'pos',[17/30 .5/20 2.6/30 .9/20]);
+    set(uc12,'pos',[20/30 .5/20 2.6/30 .9/20]);
+    set(uc13,'pos',[24.35/30 .5/20 1/30 .9/20]);
+    set(uc14,'pos',[25.5/30 .5/20 1/30 .9/20]);
+    set(uc15,'pos',[27.25/30 .5/20 2.6/30 .9/20]);
 end
 
 SetFontsizes;
@@ -324,22 +330,31 @@ drawnow;
 % Nested Functions*************************************************************
     function GoodComp_callback(~,~)
         datain.compevals(c)=2;
-        % c=find(isnan(datain.compevals),1);
-        c = c+1;
+        if c<ncomps,
+            c = c+1;
+        else
+            c=c;
+        end
         done=1;
     end
 
     function UnsureComp_callback(~,~)
         datain.compevals(c)=1;
-        % c=find(isnan(datain.compevals),1);
-        c = c+1;
+        if c<ncomps,
+            c = c+1;
+        else
+            c=c;
+        end
         done=1;
     end
 
     function RejectComp_callback(~,~)
         datain.compevals(c)=0;
-        % c=find(isnan(datain.compevals),1);
-        c = c+1;
+        if c<ncomps,
+            c = c+1;
+        else
+            c=c;
+        end
         done=1;
     end
 
@@ -482,6 +497,11 @@ drawnow;
         PlotTrial_callback;
     end
 
+    function CloseFig_callback(~,~)
+        c = ncomps + 1;
+        done=1;
+    end % end of CloseFig_callback
+
     function FigClosed_callback(~,~)
         exitnow=1;
         done=1;
@@ -565,6 +585,7 @@ drawnow;
         set(uc12,'fontsize',round(basefontsize*.75));
         set(uc13,'fontsize',basefontsize);
         set(uc14,'fontsize',basefontsize);
+        set(uc15,'fontsize',basefontsize);
         done=1;
     end % end of SetFontsizes
 
