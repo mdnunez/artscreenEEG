@@ -85,6 +85,11 @@ function HH = hortontopo(data,hm,varargin)
 %         complex data. 7/14/13
 %   1.7 - Include color electrode indications - Michael Nunez on 7/01/14
 %   1.8 - Added dependencies - Michae Nunez on 8/25/16
+%
+%%UNFINISHED%%
+%    1.9 - In progress: defaul colormap change
+%To do:
+% 1) Add parula script for earlier versions of MATLAB
 
 % Transposes data into column vector if needed
 if size(data,1)==1; data=data'; end;
@@ -118,7 +123,7 @@ else
     if weights && isempty(cmap);
         cmap='hotncold';
     elseif isempty(cmap);
-        cmap='jet';
+        cmap = parula;
     end
     
     if isempty(colorthese)
