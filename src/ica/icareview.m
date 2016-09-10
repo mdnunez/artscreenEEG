@@ -71,6 +71,14 @@ function datain = icareview(datain)
 %           component evaluation labels if they exist. 8/23/16 - Michael
 %     1.8 - Added a 'Finished' button to Save & Exit. 8/29/16 - Michael
 
+%%UNFINISHED%%
+%    1.9 - In progress: ADJUST connector
+%To do:
+% 1) Edit ADJUST functions
+% 2) Export ICA and ADJUST citations when those functions are used
+% 3) Find fastica alogirthm, add fastica
+% 3) EEGLAB file system connector
+
 if nargin < 1; help icareview; return; end;
 
 if isfield(datain,'data') && ~isfield(datain,'ica');
@@ -99,7 +107,7 @@ goodchans=find(datain.mix(1,:)~=0);
 
 % If no channel positions, disbale the topo
 if ~isfield(datain,'hm');
-    disp('No headmodel found. Disabling topo plots.');
+    disp('No headmodel found. Disabling topo plots and ADJUST');
     nohmodel=1;
 else
     nohmodel=0;
@@ -588,5 +596,19 @@ drawnow;
         set(uc15,'fontsize',basefontsize);
         done=1;
     end % end of SetFontsizes
+
+    function EEG = toADJUST(datain)
+        % Converts data structure to one that can be read by the ADJUST1.1 algorithms
+        EEG.data = datain.ica(1:2,1:2,:); %Note that this copy isn't really necessary as AJDUST just uses it to calculate data size
+        EEG.icaact = permute(datain.ica,[2,1,3]);
+        EEG.icawinv = datain.mix';
+        nchans = size(datain.mix,2);
+        %Note that this is a stupid way to organize electrode positions, and ADJUST just converts these back into a matrix
+        for n=1:nchans,
+            EEG.chanlocs(1,n) = struct('X',ica.hm.Electrode.CoordOnSphere(n,1),...
+                'Y',ica.hm.Electrode.CoordOnSphere(n,2),...
+                'Z',ica.hm.Electrode.CoordOnSphere(n,3));
+        end
+    end % end of toADJUST
 
 end % end of main function

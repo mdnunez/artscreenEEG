@@ -123,7 +123,7 @@ else
     if weights && isempty(cmap);
         cmap='hotncold';
     elseif isempty(cmap);
-        cmap = parula;
+        cmap = viridis;
     end
     
     if isempty(colorthese)
