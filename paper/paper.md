@@ -1,42 +1,29 @@
 ---
-title: 'RcppCNPy: Read-Write Support for NumPy Files in R'
+title: 'artscreenEEG: MATLAB repository to perform basic artifact correction on electroencephalographic (EEG) data'
 tags:
- - Python
- - NumPy
- - R
- - data transfer
+ - MATLAB
+ - electroencephalography (EEG)
+ - biological artifact
+ - electrical artifact
 authors:
- - name: Dirk Eddelbuettel
-   orcid: 0000-0001-6419-907X
-   affiliation: Debian and R Projects
- - name: Wush Wu
-   orcid: 0000-0001-5180-0567
-   affiliation: Institute of Electrical Engineering, National Taiwan University
-date: 26 August 2016
+ - name: Michael D Nunez
+   orcid: 0000-0002-9965-6282
+   affiliation: University of California, Irvine
+ - name: Cort Horton
+   affiliation: University of California, Irvine
+ - name: Siyi Deng
+   affiliation: University of California, Irvine
+ - name: William Winter
+   affiliation: University of California, Irvine
+ - name: Ramesh Srinivasan
+   affiliation: University of California, Irvine
+date: 26 September 2016
 bibliography: paper.bib
 ---
 
 # Summary
 
-[Python](https://https://www.python.org/) is a widely-used and popular programming
-language. It is deployed in use cases ranging from simple scripting to larger-scale
-application development. [Python](https://https://www.python.org/) is also popular for
-quantitative and scientific application due to the existence of extension modules such as
-[NumPy](http://www.numpy.org/) (which is shorthand for Numeric Python) and many other
-packages for data analysis.
-
-[NumPy](http://www.numpy.org/) [@NumPy] is used to efficiently represent N-dimensional arrays, and
-provides an efficient binary storage model for these files.  In practice, N is often equal
-to two, and matrices processed or generated in [Python](https://https://www.python.org/)
-can be stored in this form. As [NumPy](http://www.numpy.org/) is popular, many project
-utilize this file format.
-
-[R](https://www.r-project.org) has no dedicated reading or writing functionality for these
-type of files.  However, Carl Rogers has provided a small C++ library called
-[cnpy](https://github.com/rogersce/cnpy) [@CNPy]. Using the _Rcpp modules_ feature in
-[Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) [@Eddelbuettel:2013:Rcpp,@CRAN:Rcpp],
-we provide (some) features of this library to [R](https://www.r-project.org) via the 
-[RcppCNPy](https://dirk.eddelbuettel.com/code/rcpp.cnpy.html) package [@CRAN:RcppCNPy].
+artscreenEEG is a MATLAB function package to perform basic artifact correction on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use these functions. 
 
 # References
 
