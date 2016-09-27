@@ -30,6 +30,7 @@ After downloading/unzipping the repository, users will need to add these functio
 %Set 'artloc' to full directory path
 artloc = 'C:\Users\MATLAB\artscreenEEG';
 addpath(genpath(artloc));
+```
 
 ### Usage
 
@@ -40,6 +41,7 @@ For a demonstration of useage, run the following. IMPORTANT NOTE: This script wi
 edit example_steps.m;
 %Run example script
 example_steps;
+```
 
 ### License
 
