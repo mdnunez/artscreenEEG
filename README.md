@@ -50,4 +50,4 @@ artscreenEEG is licensed under the GNU General Public License v3.0 and written b
 ### Further Reading
 
 Possible EEG artifact correction reference and citation:
-Section 7 and Figure 4 of [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)
+Section 6 and Figure 4 of [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)

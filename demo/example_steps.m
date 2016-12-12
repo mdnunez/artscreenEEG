@@ -20,18 +20,18 @@
 %   ====        =================            =====================
 %  8/23/16        Michael Nunez                 Original code
 %  8/25/16        Michael Nunez       figshare link, updated feedback
+%  12/1/16        Michael Nunez     Download warning only if .mat is non-local
 
 %% Initial
 sub = 'subject1';
 
-%% See warning to advance
-warning('The following script will download and create data in the current working directory!');
-fprintf('Press any key to advance (CTRL+C to exit)...\n');
-pause;
-
 %% Code
 %Download data from figshare.com
 if ~(exist('subject1.mat') == 2)
+	%% See warning to advance
+	warning('The following script will download and create data in the current working directory!');
+	fprintf('Press any key to advance (CTRL+C to exit)...\n');
+	pause;
 	fprintf('%%Downloading example data (~240MB) in the current working directory from figshare.com...\n');
 	urlwrite(...
 		'https://ndownloader.figshare.com/files/5865048?private_link=e2405744c7a1346ea17b',...
