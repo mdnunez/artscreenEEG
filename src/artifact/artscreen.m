@@ -172,6 +172,8 @@ function datain = artscreen(datain,varargin)
 %   2.2 - Added a scale in microvolts to lower right corner of timeseries
 %         plots.  6/24/14
 %   2.3 - Added hortontopo.m capability 8/23/16 - Michael Nunez
+%   2.4 - Remove automatic removal of trials if 20% of channels are bad 
+%         12/14/16 - Michael Nunez
 
 if nargin < 1; help artscreen; return; end;
 
@@ -385,9 +387,9 @@ while 1;
     mostlybadchans=sum(artifact,2)>(ntrials*.66);
     datain.artifact(mostlybadchans,:,end)=1;
     
-    % Sets trials as bad if more than 20% of the channels are bad
-    mostlybadtrials=sum(artifact)>(nchans*.2);
-    datain.artifact(:,mostlybadtrials,end)=1;
+    % % Sets trials as bad if more than 20% of the channels are bad
+    % mostlybadtrials=sum(artifact)>(nchans*.2);
+    % datain.artifact(:,mostlybadtrials,end)=1;
     
     % Get the sum of all current rejections
     artifact=sum(datain.artifact,3);
