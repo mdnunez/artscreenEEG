@@ -70,9 +70,11 @@ function datain = icareview(datain)
 %     1.7 - No longer automatically classifies artifact, icareview now maintains 
 %           component evaluation labels if they exist. 8/23/16 - Michael
 %     1.8 - Added a 'Finished' button to Save & Exit. 8/29/16 - Michael
+%     1.9 - No reason to keep saving headmodels. 'hm' field can now be a string
+%           12/19/16 - Michael Nunez
 
 %%UNFINISHED%%
-%    1.9 - In progress: ADJUST connector
+%    1.10 - In progress: ADJUST connector
 %To do:
 % 1) Edit ADJUST functions
 % 2) Export ICA and ADJUST citations when those functions are used
@@ -105,12 +107,23 @@ goodtrials=find(sum(squeeze(var(datain.ica)))~=0);
 ngoodtrials=length(goodtrials);
 goodchans=find(datain.mix(1,:)~=0);
 
-% If no channel positions, disbale the topo
+% If no channel positions, disable the topo
 if ~isfield(datain,'hm');
     disp('No headmodel found. Disabling topo plots and ADJUST');
-    nohmodel=1;
+    nohmodel = 1;
+    strhmodel = 0;
+    adjustflag = 0;
+elseif ischar(datain.hm)
+    % If headmodel is a string, add hm
+    hmname = datain.hm;
+    datain = addhm(datain, hmname);
+    strhmodel = 1;
+    nohmodel = 0;
+    adjustflag = 1;
 else
-    nohmodel=0;
+    strhmodel =0;
+    nohmodel = 0;
+    adjustflag = 1;
 end
 
 % Create the figure, axes, and uicontrols
@@ -254,7 +267,11 @@ while exitnow==0;
     % Close the figure when evaluation is complete
     if exitnow;
         set(thefig,'DeleteFcn','');
-        close(thefig); 
+        close(thefig);
+        % If headmodel was a string, convert 'hm' field back to a string
+        if strhmodel
+            datain.hm = hmname;
+        end
         return; 
     end;
     

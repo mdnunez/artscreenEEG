@@ -1,0 +1,5 @@
+# Temporary MATLAB files
+*.m~
+
+# Temporary Markdown files
+*.md~

@@ -174,6 +174,8 @@ function datain = artscreen(datain,varargin)
 %   2.3 - Added hortontopo.m capability 8/23/16 - Michael Nunez
 %   2.4 - Remove automatic removal of trials if 20% of channels are bad 
 %         12/14/16 - Michael Nunez
+%   2.5 - No reason to keep saving headmodels. 'hm' field can now be a string
+%         12/19/16 - Michael Nunez
 
 if nargin < 1; help artscreen; return; end;
 
@@ -228,13 +230,23 @@ if ~isempty(badtrials)
     datain.artifact(:,badtrials)=1;
 end
 
-% If no channel positions, disbale the topo and interpolation
+% If no channel positions, disable the topo and interpolation
 if ~isfield(datain,'hm');
     disp('No headmodel found. Disabling topo plots and interpolation.');
-    nohmodel=1;
-    interpflag=0;
+    nohmodel = 1;
+    strhmodel = 0;
+    interpflag = 0;
+elseif ischar(datain.hm)
+    % If headmodel is a string, add hm
+    hmname = datain.hm;
+    datain = addhm(datain, hmname);
+    strhmodel = 1;
+    nohmodel = 0;
+    interpflag = 1;
 else
-    nohmodel=0;
+    strhmodel =0;
+    nohmodel = 0;
+    interpflag = 1;
 end
 
 % Calculate variance of every channel/trial
@@ -545,6 +557,11 @@ if interpflag
         end
     end
     interpdone=1;
+end
+
+% If headmodel was a string, convert 'hm' field back to a string
+if strhmodel
+    datain.hm = hmname;
 end
 
 % Average reference final output
