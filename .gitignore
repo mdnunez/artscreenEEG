@@ -3,3 +3,6 @@
 
 # Temporary Markdown files
 *.md~
+
+# Temporary text files
+*.txt~
