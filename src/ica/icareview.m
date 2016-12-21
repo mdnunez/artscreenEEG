@@ -74,6 +74,9 @@ function datain = icareview(datain)
 %           12/19/16 - Michael Nunez
 %     1.10 - ADJUST connector 12/20/16 - Michael Nunez
 
+%To do:
+% 1) Remove Cort's automatic rejection algorithm?
+
 
 if nargin < 1; help icareview; return; end;
 
