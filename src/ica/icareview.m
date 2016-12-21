@@ -72,14 +72,8 @@ function datain = icareview(datain)
 %     1.8 - Added a 'Finished' button to Save & Exit. 8/29/16 - Michael
 %     1.9 - No reason to keep saving headmodels. 'hm' field can now be a string
 %           12/19/16 - Michael Nunez
+%     1.10 - ADJUST connector 12/20/16 - Michael Nunez
 
-%%UNFINISHED%%
-%    1.10 - In progress: ADJUST connector
-%To do:
-% 1) Edit ADJUST functions
-% 2) Export ICA and ADJUST citations when those functions are used
-% 3) Find fastica alogirthm, add fastica
-% 3) EEGLAB file system connector
 
 if nargin < 1; help icareview; return; end;
 
@@ -109,7 +103,7 @@ goodchans=find(datain.mix(1,:)~=0);
 
 % If no channel positions, disable the topo
 if ~isfield(datain,'hm');
-    disp('No headmodel found. Disabling topo plots and ADJUST');
+    fprintf('No headmodel found. Disabling topo plots and ADJUST \n');
     nohmodel = 1;
     strhmodel = 0;
     adjustflag = 0;
@@ -177,11 +171,11 @@ uc4=uicontrol('parent',trialnavpanel,'style','pushbutton','units','norm',...
 % Component evaluation controls
 compchoicepanel=uipanel('title','Evaluation','TitlePosition','centertop',...
     'units','norm','pos',[widthmod*1.5/30 .5/20 widthmod*4/30 5/20]);
-uc5=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .7 .8 .25],...
+uc5=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .8 .8 .2],...
     'string','GOOD','backgroundcolor','g','callback',@GoodComp_callback);
-uc6=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .4 .8 .25],...
+uc6=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .55 .8 .2],...
     'string','UNSURE','backgroundcolor','y','callback',@UnsureComp_callback);
-uc7=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .1 .8 .25],...
+uc7=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .3 .8 .2],...
     'string','ARTIFACT','backgroundcolor','r','callback',@RejectComp_callback);
 
 % Component navigation controls
@@ -215,6 +209,10 @@ uc14=uicontrol('style','pushbutton','units','norm','pos',[widthmod*25.25/30 .5/2
 % Finished button (the x works in the same way)
 uc15=uicontrol('style','pushbutton','units','norm','pos',[widthmod*27.25/30 .5/20 2.5/30 .9/20],...
     'string','Finished','callback',@CloseFig_callback);
+
+% ADJUST button
+uc16=uicontrol('parent',compchoicepanel,'style','pushbutton','units','norm','pos',[.1 .05 .8 .2],...
+    'string','ADJUST','callback',@ADJUST_callback);
 
 if widthmod~=1
     set(uc11,'pos',[17/30 .5/20 2.6/30 .9/20]);
@@ -286,6 +284,11 @@ while exitnow==0;
     else
         set(uc10,'Enable','on');
     end
+    if ~adjustflag
+        set(uc16,'Enable','off');
+    else
+        set(uc16,'Enable','on');
+    end
     
     % Update text
     set(plotcompedit,'string',num2str(c));
@@ -353,6 +356,19 @@ drawnow;
 
 
 % Nested Functions*************************************************************
+    function ADJUST_callback(~,~)
+        adjustflag = 0;
+        set(uc16,'Enable','off');
+        fprintf('ADJUST used! Please cite:\n');
+        fprintf('Mognon A, Bruzzone L, Jovicich J, Buiatti M, \n');
+        fprintf('ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Spatial and Temporal features.\n');
+        fprintf('Psychophysiology 48 (2), 229-240 (2011).\n');
+        EEG = toADJUST(datain);
+        art = ADJUST(EEG);
+        datain.compevals(art)=0;
+        done=1;
+    end
+
     function GoodComp_callback(~,~)
         datain.compevals(c)=2;
         if c<ncomps,
@@ -611,6 +627,7 @@ drawnow;
         set(uc13,'fontsize',basefontsize);
         set(uc14,'fontsize',basefontsize);
         set(uc15,'fontsize',basefontsize);
+        set(uc16,'fontsize',basefontsize);
         done=1;
     end % end of SetFontsizes
 
@@ -621,10 +638,30 @@ drawnow;
         EEG.icawinv = datain.mix';
         nchans = size(datain.mix,2);
         %Note that this is a stupid way to organize electrode positions, and ADJUST just converts these back into a matrix
+        %%MATLAB/EEGLAB likes EEG Cartesian coordinates in the following framework:
+        %-positive X is towards the nose
+        %-positive Y is towards the left ear
+        %-positive Z is towards the vertex
+        %%artscreen/EGI coordinates have been placed in the following framework (check this for new head models):
+        %%figure; scatter3(datain.hm.Electrode.CoordOnSphere(:,1),datain.hm.Electrode.CoordOnSphere(:,2),datain.hm.Electrode.CoordOnSphere(:,3));
+        %-positive X is towards the right ear
+        %-positive Y is towards the nose
+        %-positive Z is towards the vertex
+        %The following changes reflect these differences
         for n=1:nchans,
-            EEG.chanlocs(1,n) = struct('X',ica.hm.Electrode.CoordOnSphere(n,1),...
-                'Y',ica.hm.Electrode.CoordOnSphere(n,2),...
-                'Z',ica.hm.Electrode.CoordOnSphere(n,3));
+            EEG.chanlocs(1,n) = struct('X',datain.hm.Electrode.CoordOnSphere(n,2),...
+                'Y',-datain.hm.Electrode.CoordOnSphere(n,1),...
+                'Z',datain.hm.Electrode.CoordOnSphere(n,3));
+        end
+        [temptheta, tempphi, tempradius] = cart2sph([EEG.chanlocs(1,:).X],...
+            [EEG.chanlocs(1,:).Y],[EEG.chanlocs(1,:).Z]);
+        for n=1:nchans,
+            % EEG.chanlocs(1,n).sph_theta = (180/pi)*temptheta(n);
+            % EEG.chanlocs(1,n).sph_phi = (180/pi)*tempphi(n);
+            % EEG.chanlocs(1,n).sph_radius = tempradius(n);
+            %The following was obtained from EEGLAB's convertlocs.m, line 152, and EEGLAB's sph2topo.m, lines 92 and 93
+            EEG.chanlocs(1,n).theta = -temptheta(n)*(180/pi);
+            EEG.chanlocs(1,n).radius = 0.5 - (tempphi(n)*(180/pi))/180;
         end
     end % end of toADJUST
 

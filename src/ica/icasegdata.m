@@ -63,6 +63,12 @@ function datain = icasegdata(datain,varargin)
 %   1.3 - Now calculates the percentage of the variance in the data 
 %          that each component accounts for.  7/15/13    
 %   1.4 - Changed the default number of components to solve for. 8/23/16 -Michael Nunez 
+%   1.5 - Export citation to the terminal when Infomax ICA. 12/20/16 - Michael Nunez
+
+%To do:
+% 1) Find fastica alogirthm, add fastica as an option
+% 2) Add SOBI as an option
+% 3) Change default to KEEP random components?
 
 if nargin < 1; help icasegdata; return; end;
 
@@ -70,6 +76,14 @@ if nargin < 1; help icasegdata; return; end;
 [~,ncomps,nkeep,fftfreq,extica,badchans]=...
     parsevar(varargin,'ncomps',[],'nkeep',[],...
     'fftfreq',50,'extica',1,'badchans',[]);
+
+fprintf('Infomax ICA used! Please cite:\n');
+fprintf('\n');
+fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
+fprintf('Independent component analysis of electroencephalographic data.\n');
+fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
+fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+fprintf('\n');
 
 % Determined from the data
 nsamps=size(datain.data,1);

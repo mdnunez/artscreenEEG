@@ -51,3 +51,14 @@ artscreenEEG is licensed under the GNU General Public License v3.0 and written b
 
 Possible EEG artifact correction reference and citation:
 Section 6 and Figure 4 of [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)
+
+### References
+
+Mognon A, Bruzzone L, Jovicich J, Buiatti M, 
+[ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Spatial and Temporal features.](https://www.researchgate.net/publication/45268818_ADJUST_An_automatic_EEG_artifact_detector_based_on_the_joint_use_of_spatial_and_temporal_features) 
+Psychophysiology 48 (2), 229-240 (2011).
+
+Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J.,
+[Independent component analysis of electroencephalographic data.](https://www.researchgate.net/publication/2242002_Independent_Component_Analysis_of_Electroencephalographic_Data)
+In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural 
+Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).
