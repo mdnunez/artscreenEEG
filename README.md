@@ -2,7 +2,7 @@
 
 # artscreenEEG
 
-**Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
+**Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
 artscreenEEG is a MATLAB function package to perform basic artifact correction on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use these functions. 
 
