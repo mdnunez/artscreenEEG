@@ -21,6 +21,7 @@
 %  8/23/16        Michael Nunez                 Original code
 %  8/25/16        Michael Nunez       figshare link, updated feedback
 %  12/1/16        Michael Nunez     Download warning only if .mat is non-local
+%  1/17/17        Michael Nunez  Changing name of structure to avoid confusion
 
 %% Initial
 sub = 'subject1';
@@ -41,20 +42,26 @@ else
 	fprintf('%%subject1.mat file found locally. Loading this data...\n');
 end
 
+fprintf('\n');
+fprintf('%%Note that all of the base artscreenEEG functions take MATLAB structure inputs with fields ''data'' and ''sr'' at least.\n');
+fprintf('%%Field ''hm'' is a recommended head model field. ''hm'' itself is a structure with fields ''CoordOnSphere'', ''SphereExtendAngle'', and ''Scaling2D''.\n');
+fprintf('\n');
+
 %The following data has been bandpass filtered from 1 to 100 Hz with a notch at 60 Hz
 %Some channels have been premarked as artifact
-data = load(sprintf('%s.mat',sub)); %Can this be loaded from figshare.com?
-fprintf('%%Adding headmodel...\n');
-data = addhm(data,'eginn128');
+eeg = load(sprintf('%s.mat',sub)); %Load all variables in structure 'eeg'
+fprintf('%%Adding head model...\n');
+fprintf('%%Alternate spherical head model .mat files are contained in src/hmodels.\n');
+eeg = addhm(eeg,'eginn128');
 
 fprintf('%%Loading downloaded data into artscreen()...\n');
 fprintf('%%Try a 300 abs variance cutoff...\n');
 %Use 300 abs variance cutoff, reject poor channels not in parietal and occipital locations
-data = artscreen(data); 
+eeg = artscreen(eeg); 
 
 %Independent component analysis on data
 fprintf('%%Running ICA on artscreened data...\n');
-ica = icasegdata(data,'ncomps',60,'nkeep',60,'fftfreq',100);
+ica = icasegdata(eeg,'ncomps',60,'nkeep',60,'fftfreq',100);
 
 %Save ICA data
 fprintf('%%Saving ICA data...\n');
@@ -72,7 +79,7 @@ save(sprintf('%s_ica.mat',sub),'-struct','ica');
 
 %ICs to Chan data: Keep components which are marked as "unsure"
 fprintf('%%Keeping all components marked as "good" or "unsure"...\n');
-data = icatochan(ica,1); 
+eeg = icatochan(ica,1); 
 
 %Filter data
 % Lowpass the data
@@ -88,11 +95,11 @@ Hd = design(h, 'butter', 'MatchExactly', match);
 
 % Carry out the filtering
 fprintf('%%Lowpass filtering the data at 50 Hz...\n');
-data.data=filtfilthd(Hd,data.data);
+eeg.data=filtfilthd(Hd,eeg.data);
 
 %Remove any probable bad trials observed during "icareview"
 fprintf('%%A second pass of artscreen() is recommended...\n');
-data = artscreen(data);
+eeg = artscreen(eeg);
 
 %Save cleaned data
 fprintf('%%Saving the cleaned data...\n');
