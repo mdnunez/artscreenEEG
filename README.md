@@ -45,7 +45,7 @@ example_steps;
 
 ### License
 
-artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
+artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
 
 ### Further Reading
 
