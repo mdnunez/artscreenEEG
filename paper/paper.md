@@ -15,6 +15,8 @@ authors:
    affiliation: University of California, Irvine
  - name: William Winter
    affiliation: University of California, Irvine
+ - name: Mark Dennison
+   affiliation: University of California, Irvine
  - name: Jacky Au
    affiliation: University of California, Irvine
  - name: Ramesh Srinivasan
