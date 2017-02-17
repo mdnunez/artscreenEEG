@@ -18,7 +18,7 @@ This software should work on any operating system that runs the correct version 
 
 ### Downloading
 
-The repository can be cloned with `git clone git@github.oit.uci.edu:mdnunez1/artscreenEEG.git`
+The repository can be cloned with `git clone https://github.com/mdnunez/artscreenEEG.git`
 
 The repository can also be may download via the _Download zip_ button above.
 
