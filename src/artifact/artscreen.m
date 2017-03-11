@@ -176,6 +176,13 @@ function datain = artscreen(datain,varargin)
 %         12/14/16 - Michael Nunez
 %   2.5 - No reason to keep saving headmodels. 'hm' field can now be a string
 %         12/19/16 - Michael Nunez
+%   2.6 - Added spline interpolation and spherical Laplacian buttons 
+%         03/10/17
+
+%To do:
+% 1) Track and display spline interpolated data
+% 2) Display spherical Laplacian?
+% 3) Record the outer ring in head models to be ignored after the spherical-spline-Laplacian filter
 
 if nargin < 1; help artscreen; return; end;
 
@@ -346,6 +353,14 @@ tseriesbutton=uicontrol('units','norm','pos',[5.5/30 19.1/20 2/30 .75/20],...
     'style','pushbutton','string','T. Series','Enable','on',...
     'callback',@goTseries_callback);
 
+interpbutton=uicontrol('units','norm','pos',[14.5/30 19.1/20 2/30 .75/20],...
+    'style','pushbutton','string','Interp','Enable','on',...
+    'callback',@Interp_callback);
+
+laplacianbutton=uicontrol('units','norm','pos',[16.75/30 19.1/20 2/30 .75/20],...
+    'style','pushbutton','string','Laplacian','Enable','on',...
+    'callback',@Laplacian_callback);
+
 back10button=uicontrol('units','norm','pos',[.025 .025 .04 .04],...
     'style','pushbutton','string','<<','callback',@Back10Trials_callback,'visible','off');
 
@@ -384,7 +399,9 @@ shownorm=1;
 showraw=0;
 showtimeseries=0;
 interpdone=0;
+lapdone = 0;
 trialtoplot=1;
+displap = 0;
 
 SetFontsizes;
 
@@ -544,18 +561,7 @@ end
 
 % Data Interpolation
 if interpflag
-    disp('Interpolating rejected channels...');
-    chanpos=datain.hm.Electrode.CoordOnSphere;
-    interpchans=setdiff(1:size(chanpos,1),datain.hm.Electrode.NoInterp);
-    
-    for t=goodtrials
-        mat=splineinterp(.1,chanpos(interpchans(datain.artifact(interpchans,t)==0),:),chanpos(interpchans,:));
-        if cellmode
-            datain.data{t}(:,interpchans)=datain.data{t}(:,interpchans(datain.artifact(interpchans,t)==0))*mat';
-        else
-            datain.data(:,interpchans,t)=datain.data(:,interpchans(datain.artifact(interpchans,t)==0),t)*mat';
-        end
-    end
+    Interp_callback;
     interpdone=1;
 end
 
@@ -564,8 +570,10 @@ if strhmodel
     datain.hm = hmname;
 end
 
-% Average reference final output
-doAvgRef;
+if ~lapdone
+    % Average reference final output
+    doAvgRef;
+end
 
 
 %% Nested Functions: These share a workspace with the main function********
@@ -575,7 +583,7 @@ doAvgRef;
         % This function average references the data. Artifact channels are
         % not included in the average.
         
-        disp('Average referencing the data...');
+        fprintf('Average referencing the data...\n');
         
         if ~interpdone
             % Zero out all rejected data first
@@ -612,6 +620,58 @@ doAvgRef;
         
     end % end of doAvgRef
 
+    function Interp_callback(~,~,~)
+        % Performs a spline interpolation on the data
+        fprintf('Interpolating rejected channels...\n');
+        chanpos=datain.hm.Electrode.CoordOnSphere;
+        if isfield(datain.hm.Electrode,'NoInterp')
+            interpchans=setdiff(1:size(chanpos,1),datain.hm.Electrode.NoInterp);
+        else
+            interpchans = 1:size(chanpos,1);
+        end
+        
+        for t=goodtrials
+            mat=splineinterp(.1,chanpos(interpchans(datain.artifact(interpchans,t)==0),:),chanpos(interpchans,:));
+            if cellmode
+                datain.data{t}(:,interpchans)=datain.data{t}(:,interpchans(datain.artifact(interpchans,t)==0))*mat';
+            else
+                datain.data(:,interpchans,t)=datain.data(:,interpchans(datain.artifact(interpchans,t)==0),t)*mat';
+            end
+        end
+        interpdone = 1;
+        set(interpbutton,'Enable','off');
+        done = 1;
+    end % end of Interp_callback
+
+    function Laplacian_callback(~,~,~)
+        % Performs a Laplacian filter on the data
+        fprintf('Calculating a spherical spline Laplacian filter...\n');
+        chanpos=datain.hm.Electrode.CoordOnSphere;
+        %Need to remove the outer ring for Laplacian channels
+        if isfield(datain.hm.Electrode,'NoInterp')
+            lapchans=setdiff(1:size(chanpos,1),datain.hm.Electrode.NoInterp);
+            if isfield(datain.hm.Electrode,'NoLap')
+                lapchans=setdiff(lapchans,datain.hm.Electrode.NoLap);
+            end
+        else
+            lapchans = 1:size(chanpos,1);
+        end
+
+        
+        for t=goodtrials
+            mat=splinenlap(.1,chanpos(lapchans(datain.artifact(lapchans,t)==0),:),chanpos(lapchans,:));
+            if cellmode
+                datain.data{t}(:,lapchans)=datain.data{t}(:,lapchans(datain.artifact(lapchans,t)==0))*mat';
+            else
+                datain.data(:,lapchans,t)=datain.data(:,lapchans(datain.artifact(lapchans,t)==0),t)*mat';
+            end
+        end
+        lapdone=1;
+        set(laplacianbutton,'Enable','off');
+        set(avgrefbutton,'Enable','off');
+        done=1;
+    end % end of Laplacian_callback
+
     function AvgRef_callback(~,~,~)
         % Performs average referencing of the data
         doAvgRef;
@@ -623,6 +683,7 @@ doAvgRef;
         else
             thevars=squeeze(var(datain.data));
         end
+        set(avgrefbutton,'Enable','off');
         done=1;
     end % end of AvgRef_callback
 
@@ -661,7 +722,7 @@ doAvgRef;
         SetTimeseriesVisible;
         SetFontsizes;
         done=1;
-    end % end of goRaw_callback
+    end % end of goTseries_callback
 
     function Plot_callback(~,~,~)
         % This Callback function is used to plot individual trials. The spacing
@@ -704,6 +765,12 @@ doAvgRef;
             done=1;
             return;
         end
+
+        interpdone = 0;
+        set(interpbutton,'Enable','on');
+
+        lapdone = 0;
+        set(laplacianbutton,'Enable','on');
         
         if isempty(rejtrials); rejtrials=1:ntrials; end;
         if isempty(rejchans); rejchans=1:nchans; end;
@@ -816,6 +883,8 @@ doAvgRef;
         set(normvarbutton,'fontsize',round(basefontsize*.6));
         set(rawvarbutton,'fontsize',round(basefontsize*.6));
         set(tseriesbutton,'fontsize',round(basefontsize*.6));
+        set(interpbutton,'fontsize',round(basefontsize*.6));
+        set(laplacianbutton,'fontsize',round(basefontsize*.6));
         
         if showtimeseries
             set(back10button,'fontsize',round(basefontsize*.6));
