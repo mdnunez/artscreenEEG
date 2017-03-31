@@ -62,12 +62,11 @@
 % ADDITIONAL CAPABILITIES:
 % Flat channels (zero variance) will automatically be labeled as artifact.
 %
-% The data is average referenced at the end of the artifact screening
-% process, plus you have the option of average referencing during the
-% screening process if you find and large artifacts that have bled into
-% other channels due to recording with a hardware average reference such
-% as found in the ANT EEG system.  The value that has been subtracted from
-% every channel is retained in the .avgref field of the data structure.
+% You have the option of average referencing during the screening process 
+% if you find and large artifacts that have bled into other channels due 
+% to recording with a hardware average reference such as found in the 
+% ANT EEG system.  The value that has been subtracted from every channel is 
+% retained in the .avgref field of the data structure.
 %
 % By default, any channels that are rejected will be replaced with new data
 % that is interpolated from neighboring channels using a spline function.
