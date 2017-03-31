@@ -177,7 +177,10 @@ function datain = artscreen(datain,varargin)
 %   2.5 - No reason to keep saving headmodels. 'hm' field can now be a string
 %         12/19/16 - Michael Nunez
 %   2.6 - Added spline interpolation and spherical Laplacian buttons 
-%         03/10/17
+%         03/10/17 - Michael Nunez
+%   2.7 - Remove average reference default 
+%         03/31/17 - Michael Nunez
+%         03/31/17 - Michael Nunez
 
 %To do:
 % 1) Track and display spline interpolated data
@@ -570,10 +573,10 @@ if strhmodel
     datain.hm = hmname;
 end
 
-if ~lapdone
-    % Average reference final output
-    doAvgRef;
-end
+% if ~lapdone
+%     % Average reference final output
+%     doAvgRef;
+% end
 
 
 %% Nested Functions: These share a workspace with the main function********
