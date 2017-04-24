@@ -19,11 +19,11 @@
 %
 %    ncomps-  the number of components to solve for. Must be <= the number 
 %             of channels and have > ncomps^3 good samples of
-%             data. Default: min([60 nchans round(goodsamps^(1/3))])
+%             data. Default: min([nchans round(goodsamps^(1/3))])
 %
 %    nkeep-   the number of components to retain for review. The comps
 %             are sorted by variance, thus only minor artifacts comprise
-%             the later components. Defaut: min([40 ncomps])
+%             the later components. Defaut: ncomps
 %
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
@@ -62,13 +62,17 @@ function datain = icasegdata(datain,varargin)
 %   1.2 - Some changes to default values 7/1/13
 %   1.3 - Now calculates the percentage of the variance in the data 
 %          that each component accounts for.  7/15/13    
-%   1.4 - Changed the default number of components to solve for. 8/23/16 -Michael Nunez 
-%   1.5 - Export citation to the terminal when Infomax ICA. 12/20/16 - Michael Nunez
+%   1.4 - Changed the default number of components to solve for. 
+%         8/23/16 -Michael Nunez 
+%   1.5 - Export citation to the terminal when Infomax ICA. 
+%         12/20/16 - Michael Nunez
+%   1.6 - Change defaults for the number of components to solve for 
+%         and keep, reject from datain.artifact 04/24/17 - Michael Nunez
+
 
 %To do:
 % 1) Find fastica alogirthm, add fastica as an option
 % 2) Add SOBI as an option
-% 3) Change default to KEEP random components?
 
 if nargin < 1; help icasegdata; return; end;
 
@@ -94,6 +98,12 @@ tlength=nsamps/datain.sr;
 disp('Assuming all non-zero and non-NaN data are good...');
 thevars=squeeze(var(datain.data));
 artifact=thevars==0 | isnan(thevars);
+
+if isfield(datain,'artifact')
+     disp('Rejecting data from .artifact field matrix...');
+     artifact = datain.artifact | artifact;
+end
+
 goodtrials=setdiff(1:ntrials,find(sum(artifact)==nchans));
 goodchans=setdiff(1:nchans,find(sum(artifact,2)==ntrials));
 goodchans=setdiff(goodchans,badchans);
@@ -102,24 +112,23 @@ ngoodtrials=length(goodtrials);
 
 % Choose reasonable number of components to solve for if not given
 if isempty(ncomps);
-    ncomps=min([60 ngoodchans round((ngoodtrials*nsamps)^(1/3))]);
+    ncomps=min([ngoodchans round((ngoodtrials*nsamps)^(1/3))]);
     disp(['Solving for ' num2str(ncomps) ' components...']);
 end
 
-% Keeps top 60 components. Smaller ones contribute insignificant variance
-% for the most part
+% Smaller components contribute insignificant variance for the most part
 if isempty(nkeep);
-    nkeep=min([60 ncomps]);
+    nkeep=ncomps;
 end
 
 % Checks for bad inputs
 if ncomps > ngoodchans;
-    disp('ncomps cannot be greater than ngoodchans, resetting ncomps to ngoodchans...');
+    fprintf('ncomps cannot be greater than ngoodchans, resetting ncomps to %d...\n',ngoodchans);
     ncomps=ngoodchans;
 end
 if ncomps > round((ngoodtrials*nsamps)^(1/3));
-    ncomps=round((ngoodtrials*nsamps)^(1/3));
-    disp(['Not enough samples per component, lowering ncomps to ' num2str(ncomps) '...']);
+    suggested_ncomps=round((ngoodtrials*nsamps)^(1/3));
+    warning(['Possibly not enough samples per component. It is recommended to lower ncomps to ' num2str(suggested_ncomps) '...']);
 end
 if nkeep > ncomps;
     disp('nkeep cannot be greater than ncomps, resetting nkeep to ncomps...');
