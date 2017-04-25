@@ -277,7 +277,7 @@ datascale=1;
 datain.artifact(thevars==0)=1;
 
 % Sets NaN data as artifact
-data.artifact(isnan(thevars))=1;
+datain.artifact(isnan(thevars))=1;
 
 % Makes the GUI
 screensize=get(0,'ScreenSize');
