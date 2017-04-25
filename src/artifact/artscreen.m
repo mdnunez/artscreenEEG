@@ -179,6 +179,8 @@ function datain = artscreen(datain,varargin)
 %         03/10/17 - Michael Nunez
 %   2.7 - Remove average reference default 
 %         03/31/17 - Michael Nunez
+%   2.8 - Sets NaN data as artifact
+%         04/25/17 - Michael Nunez
 
 %To do:
 % 1) Track and display spline interpolated data
@@ -271,8 +273,11 @@ end
 chansep=5*mean(mean(sqrt(thevars)));
 datascale=1;
 
-% Sets flat channels as artifact
+% Sets flat data as artifact
 datain.artifact(thevars==0)=1;
+
+% Sets NaN data as artifact
+data.artifact(isnan(thevars))=1;
 
 % Makes the GUI
 screensize=get(0,'ScreenSize');
