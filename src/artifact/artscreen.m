@@ -179,9 +179,9 @@ function datain = artscreen(datain,varargin)
 %         03/10/17 - Michael Nunez
 %   2.7 - Remove average reference default 
 %         03/31/17 - Michael Nunez
-%   2.8 - Sets NaN data as artifact
+%   2.8 - Sets NaN data as artifact, fix interpolation after closing GUI
 %         04/25/17 - Michael Nunez
-
+ 
 %To do:
 % 1) Track and display spline interpolated data
 % 2) Display spherical Laplacian?
@@ -645,7 +645,7 @@ end
             end
         end
         interpdone = 1;
-        set(interpbutton,'Enable','off');
+        %set(interpbutton,'Enable','off');
         done = 1;
     end % end of Interp_callback
 
