@@ -736,7 +736,6 @@ end
             return;
         end
 
-        if 
         interpdone = 0;
         set(interpbutton,'Enable','on');
         
