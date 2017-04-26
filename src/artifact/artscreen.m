@@ -181,7 +181,7 @@ function datain = artscreen(datain,varargin)
 %         03/31/17 - Michael Nunez
 %   2.8 - Sets NaN data as artifact, fix interpolation after closing GUI,
 %         Remove Laplacian button (see lapdata.m)
-%         04/25/17 - Michael Nunez
+%         04/26/17 - Michael Nunez
  
 %To do:
 % 1) Track and display spline interpolated data
@@ -269,7 +269,7 @@ else
 end
 
 % Set spacing between channels on timeseries view
-chansep=5*mean(mean(sqrt(thevars)));
+chansep=5*nanmean(mean(sqrt(thevars)));
 datascale=1;
 
 % Sets flat data as artifact
