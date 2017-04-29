@@ -16,13 +16,10 @@
 %    erpwind - the window to average the data (calculate the ERP).
 %              Default: [1:size(datain.data,1)]
 %
-%    ncomps-  the number of components to solve for. Must be <= the number 
-%             of channels and have > ncomps^3 good samples of
-%             data. Default: min([nchans round(goodsamps^(1/3))])
+%    baseline - window to calculate the baseline of the ERP
+%               Default: [] (no baseline)
 %
-%    nkeep-   the number of components to retain for review. The comps
-%             are sorted by variance, thus only minor artifacts comprise
-%             the later components. Defaut: ncomps
+%    ncomps-  the number of components to solve for. Default: nchans
 %
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
@@ -57,9 +54,10 @@ function datain = svderp(datain,varargin)
 if nargin < 1; help svderp; return; end;
 
 % Parse inputs;
-[~,erpwind,ncomps,nkeep,fftfreq,badchans]=...
-    parsevar(varargin,'erpwind',1:size(datain.data,1),'ncomps',[],'nkeep',[],...
-    'fftfreq',50,'badchans',[]);
+[~,erpwind,baseline,ncomps,fftfreq,badchans]=...
+    parsevar(varargin,'erpwind',1:size(datain.data,1),...
+        'baseline',[],'ncomps',[],...
+        'fftfreq',50,'badchans',[]);
 
 fprintf('SVD ERP used! Please cite:\n');
 fprintf('\n');
@@ -93,7 +91,7 @@ ngoodtrials=length(goodtrials);
 
 % Choose reasonable number of components to solve for if not given
 if isempty(ncomps);
-    ncomps=min([ngoodchans round((ngoodtrials*nsamps)^(1/3))]);
+    ncomps=ngoodchans;
     disp(['Solving for ' num2str(ncomps) ' components...']);
 end
 
@@ -107,14 +105,7 @@ if ncomps > ngoodchans;
     fprintf('ncomps cannot be greater than ngoodchans, resetting ncomps to %d...\n',ngoodchans);
     ncomps=ngoodchans;
 end
-if ncomps > round((ngoodtrials*nsamps)^(1/3));
-    suggested_ncomps=round((ngoodtrials*nsamps)^(1/3));
-    warning(['Possibly not enough samples per component. It is recommended to lower ncomps to ' num2str(suggested_ncomps) '...']);
-end
-if nkeep > ncomps;
-    disp('nkeep cannot be greater than ncomps, resetting nkeep to ncomps...');
-    nkeep=ncomps;
-end
+
 if fftfreq>datain.sr/2;
     disp('fftfreq cannot be higher than nyquist, resetting to nyquist...');
     fftfreq=datain.sr/2;
