@@ -51,23 +51,24 @@ function datain = svderp(datain,varargin)
 %% Record of Revisions
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
-%  04/28/17       Michael Nunez                Original code
+%  04/28/17       Michael Nunez          Converted from icasegdata.m
 
 
-if nargin < 1; help icasegdata; return; end;
+if nargin < 1; help svderp; return; end;
 
 % Parse inputs;
-[~,ncomps,nkeep,fftfreq,extica,badchans]=...
-    parsevar(varargin,'ncomps',[],'nkeep',[],...
-    'fftfreq',50,'extica',1,'badchans',[]);
+[~,erpwind,ncomps,nkeep,fftfreq,badchans]=...
+    parsevar(varargin,'erpwind',1:size(datain.data,1),'ncomps',[],'nkeep',[],...
+    'fftfreq',50,'badchans',[]);
 
-fprintf('Infomax ICA used! Please cite:\n');
+fprintf('SVD ERP used! Please cite:\n');
 fprintf('\n');
-fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
-fprintf('Independent component analysis of electroencephalographic data.\n');
-fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
-fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+fprintf('Nunez, M. D., Vandekerckhove, J., & Srinivasan, R., \n');
+fprintf('How attention influences perceptual decision making:\n');
+fprintf('Single-trial EEG correlates of drift-diffusion model parameters.\n');
+fprintf('Journal of Mathematical Psychology, 76, 117-130. (2017).\n');
 fprintf('\n');
+
 
 % Determined from the data
 nsamps=size(datain.data,1);
@@ -129,7 +130,6 @@ alldatasquared=sum(sum(alldata.^2));
 % Prepare the ICA data structure
 datain.ica=zeros(nsamps,ncomps,ntrials);
 datain.sep=zeros(ncomps,nchans);
-datain.mix=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
 if extica; tmpstr='extended '; else tmpstr=''; end;
