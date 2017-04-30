@@ -48,7 +48,7 @@ function datain = svderp(datain,varargin)
 %% Record of Revisions
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
-%  04/28/17       Michael Nunez          Converted from icasegdata.m
+%  04/29/17       Michael Nunez          Converted from icasegdata.m
 
 
 if nargin < 1; help svderp; return; end;
@@ -95,11 +95,6 @@ if isempty(ncomps);
     disp(['Solving for ' num2str(ncomps) ' components...']);
 end
 
-% Smaller components contribute insignificant variance for the most part
-if isempty(nkeep);
-    nkeep=ncomps;
-end
-
 % Checks for bad inputs
 if ncomps > ngoodchans;
     fprintf('ncomps cannot be greater than ngoodchans, resetting ncomps to %d...\n',ngoodchans);
@@ -119,42 +114,36 @@ alldata=segtocat(datain.data(:,goodchans,goodtrials));
 alldatasquared=sum(sum(alldata.^2));
 
 % Prepare the ICA data structure
-datain.ica=zeros(nsamps,ncomps,ntrials);
+datain.cmp=zeros(nsamps,ncomps,ntrials);
 datain.sep=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
-if extica; tmpstr='extended '; else tmpstr=''; end;
-disp(['Running ' tmpstr 'Infomax ICA on the data...']);
-[w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
+%Calculate the ERP
+dataforerp = datain.data(:,:,goodtrials);
+dataforerp(:, setdiff(1:nchans,goodchans), :) = 0;
+if ~isempty(baseline)
+    dataforerp = eegBaseline(dataforerp,baseline);
+end
+erp = mean(dataforerp,3);
+
+%Use singular value decomposition
+[U,S,V] = svd(erp,'econ');
+
 
 % Put ICA data into the output structure
-datain.sep(:,goodchans)=w*s;
-datain.mix=pinv(datain.sep)';
-icasig=alldata*datain.sep(:,goodchans)';
-datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+datain.sep=V(:, ncomps);
+datain.mix=datain.sep';
+cmpsig=alldata*datain.sep';
+datain.cmp=cattoseg(cmpsig,nsamps);
 
 disp('Getting percent of variance that each component accounts for...');
-% Uses the average of two different methods, one that overestimates and one
-% that underestimates.
-cpvars1=zeros(1,ncomps);
-cpvars2=zeros(1,ncomps);
-for c=1:ncomps;
-    compproj=icasig(:,c)*datain.mix(c,goodchans);
-    
-    datalesscomp=alldata-compproj;
-    sumdifsquared=sum(sum(datalesscomp.^2));
-    cpvars1(c)=100*(1-sumdifsquared/alldatasquared);
-    
-    projsquared=sum(sum(compproj.^2));
-    cpvars2(c)=100*(projsquared/alldatasquared);
-end
-datain.cpvars=(cpvars1+cpvars2)/2;
+datain.cpvars=diag(S.^2)/sum(diag(S.^2));
     
 disp('Getting variance-weighted amplitude specta for each component...');
-tmp=fft(datain.ica)/nsamps;
+tmp=fft(datain.cmp)/nsamps;
 fcoefs=tmp((1:nbins)+1,:,:);
 
-trialvars=squeeze(var(datain.ica));
+trialvars=squeeze(var(datain.cmp));
 
 tmp=zeros(nbins,ncomps,ntrials);
 for c=1:ncomps;
@@ -164,18 +153,11 @@ datain.wspecs=mean(tmp(:,:,goodtrials),3);
 
 % Reorder based on calculated percent variance
 [~,sortorder]=sort(datain.cpvars,'descend');
-datain.ica=datain.ica(:,sortorder,:);
+datain.cmp=datain.cmp(:,sortorder,:);
 datain.sep=datain.sep(sortorder,:);
 datain.mix=datain.mix(sortorder,:);
 datain.cpvars=datain.cpvars(sortorder);
 datain.wspecs=datain.wspecs(:,sortorder);
-
-% Throws out components beyond nkeep
-datain.ica=datain.ica(:,1:nkeep,:);
-datain.sep=datain.sep(1:nkeep,:);
-datain.mix=datain.mix(1:nkeep,:);
-datain.cpvars=datain.cpvars(1:nkeep);
-datain.wspecs=datain.wspecs(:,1:nkeep);
 
 % Tosses orginal data 
 datain=rmfield(datain,'data');
