@@ -1,4 +1,3 @@
-%%%%%%%%%%UNFINISHED%%%%%%%%%%%
 % function newdata = svderp(datain,varargin)
 %
 % This function performs an SVD decomposition of segmented data.
@@ -19,13 +18,16 @@
 %    baseline - window to calculate the baseline of the ERP
 %               Default: [] (no baseline)
 %
+%    erptrials - Trial index to calculate erp
+%                Default: All non-artifact trials
+%
 %    ncomps-  the number of components to solve for. Default: nchans
 %
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
 %
 %    badchans - channels that are not zeroed out but should be considered
-%               bad and excluded from the ICA.
+%               bad and excluded from the SVDERP.
 %                    
 %
 % Copyright (C) 2017 Michael D. Nunez, <mdnunez1@uci.edu>
@@ -48,15 +50,15 @@ function datain = svderp(datain,varargin)
 %% Record of Revisions
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
-%  04/29/17       Michael Nunez          Converted from icasegdata.m
+%  05/01/17       Michael Nunez          Converted from icasegdata.m
 
 
 if nargin < 1; help svderp; return; end;
 
 % Parse inputs;
-[~,erpwind,baseline,ncomps,fftfreq,badchans]=...
+[~,erpwind,baseline,erptrials,ncomps,fftfreq,badchans]=...
     parsevar(varargin,'erpwind',1:size(datain.data,1),...
-        'baseline',[],'ncomps',[],...
+        'baseline',[],'erptrials',1:size(datain.data,3),'ncomps',[],...
         'fftfreq',50,'badchans',[]);
 
 fprintf('SVD ERP used! Please cite:\n');
@@ -109,17 +111,14 @@ end
 % Other calculated values
 nbins=ceil(fftfreq*tlength);
 
-% Concatenate data to prepare for ICA
-alldata=segtocat(datain.data(:,goodchans,goodtrials));
-alldatasquared=sum(sum(alldata.^2));
-
-% Prepare the ICA data structure
+% Prepare the SVDERP data structure
 datain.cmp=zeros(nsamps,ncomps,ntrials);
 datain.sep=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
 %Calculate the ERP
-dataforerp = datain.data(:,:,goodtrials);
+erptrials = intersect(goodtrials,erptrials);
+dataforerp = datain.data(erpwind,:,erptrials);
 dataforerp(:, setdiff(1:nchans,goodchans), :) = 0;
 if ~isempty(baseline)
     dataforerp = eegBaseline(dataforerp,baseline);
@@ -129,15 +128,18 @@ erp = mean(dataforerp,3);
 %Use singular value decomposition
 [U,S,V] = svd(erp,'econ');
 
+% Concatenate data to prepare for multiplication
+alldata=segtocat(datain.data);
 
-% Put ICA data into the output structure
-datain.sep=V(:, ncomps);
-datain.mix=datain.sep';
+% Put SVDERP data into the output structure
+datain.sep=V(:, 1:ncomps)';
+datain.mix=datain.sep;
 cmpsig=alldata*datain.sep';
 datain.cmp=cattoseg(cmpsig,nsamps);
 
 disp('Getting percent of variance that each component accounts for...');
-datain.cpvars=diag(S.^2)/sum(diag(S.^2));
+cpvars=diag(S.^2)/sum(diag(S.^2))*100;
+datain.cpvars = cpvars(1:ncomps);
     
 disp('Getting variance-weighted amplitude specta for each component...');
 tmp=fft(datain.cmp)/nsamps;
