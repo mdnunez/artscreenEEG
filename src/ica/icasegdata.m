@@ -74,15 +74,16 @@ function datain = icasegdata(datain,varargin)
 %   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
 
 %To do:
-% 1) Verify use of Moore-Penrose pseudoinverse after Infomax ICA 
-% 2) Add SOBI as an option
+% 1) Verify use of Moore-Penrose pseudoinverse after Infomax ICA
+% 2) Add 'verbose' flag 
+% 3) Add SOBI as a feature to artscreenEEG
 
 if nargin < 1; help icasegdata; return; end;
 
 % Parse inputs;
 [~,ncomps,nkeep,fftfreq,algorithm,extica,badchans]=...
     parsevar(varargin,'ncomps',[],'nkeep',[],...
-    'fftfreq',50,'extica',1,'badchans',[]);
+    'fftfreq',50,'algorithm','infomax','extica',1,'badchans',[]);
 
 if (~strcmp(algorithm,'infomax')) & (~strcmp(algorithm,'fastica'))
     error('Algorithm choices are either ''infomax'' or ''fastica''');
@@ -96,7 +97,7 @@ if strcmp(algorithm,'infomax')
     fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
     fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
     fprintf('\n');
-elseif strcmp(algorith,'fastica')
+elseif strcmp(algorithm,'fastica')
     fprintf('FastICA used! Please cite:\n');
     fprintf('\n');
     fprintf('Oja, E., & Hyvarinen, A., \n'); 
@@ -170,20 +171,28 @@ datain.cpvars=zeros(1,ncomps);
 
 if strcmp(algorithm,'infomax')
     if extica; tmpstr='extended '; else tmpstr=''; end;
-        disp(['Running ' tmpstr 'Infomax ICA on the data...']);
-        [w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
-        % Put ICA data into the output structure
-        datain.sep(:,goodchans)=w*s;
-        datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
-        icasig=alldata*datain.sep(:,goodchans)';
-        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
-    end
-elseif strcmp(algorith,'fastica')
-    disp(['Running ' tmpstr 'FastICA on the data...']);
-        [icasig, A, W]=fastica(alldata','lastEig', ncomps, 'numOfIC', ncomps);
+    disp(['Running ' tmpstr 'Infomax ICA on the data...']);
+    [w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
+    % Put ICA data into the output structure
+    datain.sep(:,goodchans)=w*s;
+    datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
+    icasig=alldata*datain.sep(:,goodchans)';
+    datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+elseif strcmp(algorithm,'fastica')
+    disp(['Running FastICA on the data...']);
+        [outsig, A, W]=fastica(alldata','verbose','off','lastEig', ncomps, 'numOfIC', ncomps);
+        if ncomps ~= size(W,1);
+            ncomps = size(W,1);
+            fprintf('FastICA only found %d components, resetting ncomps to %d...\n',ncomps);
+            datain.ica=zeros(nsamps,ncomps,ntrials);
+            datain.sep=zeros(ncomps,nchans);
+            datain.mix=zeros(ncomps,nchans);
+            datain.cpvars=zeros(1,ncomps);
+        end
         % Put ICA data into the output structure
         datain.sep(:,goodchans)=W;
         datain.mix(:,goodchans)=A';
+        icasig = outsig';
         datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
 end
 
