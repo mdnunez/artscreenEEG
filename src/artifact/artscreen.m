@@ -182,6 +182,8 @@ function datain = artscreen(datain,varargin)
 %   2.8 - Sets NaN data as artifact, fix interpolation after closing GUI,
 %         Remove Laplacian button (see lapdata.m)
 %         04/28/17 - Michael Nunez
+%   2.9 - Enable average reference button after artifact removal
+%         05/01/17 - Michael Nunez
  
 %To do:
 % 1) Track and display spline interpolated data
@@ -738,6 +740,7 @@ end
 
         interpdone = 0;
         set(interpbutton,'Enable','on');
+        set(avgrefbutton,'Enable','on');
         
         if isempty(rejtrials); rejtrials=1:ntrials; end;
         if isempty(rejchans); rejchans=1:nchans; end;
