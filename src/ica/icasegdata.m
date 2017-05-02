@@ -29,7 +29,7 @@
 %             spectra.  Default: 50
 %
 %    algorithm - string indicating which ICA algorithm to use. 
-%                Choices: 'runica' or 'fastica'. Default: 'runica'
+%                Choices: 'infomax' or 'fastica'. Default: 'infomax'
 %
 %    extica-  flag to use the 'extended' infomax ICA, which can separate
 %             sub-gaussian sources such as line noise. Note that the
@@ -72,10 +72,10 @@ function datain = icasegdata(datain,varargin)
 %   1.6 - Change defaults for the number of components to solve for 
 %         and keep, reject from datain.artifact 04/24/17 - Michael Nunez
 %   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
-%%%%%UNFINISHED%%%%
 
 %To do:
-% 1) Add SOBI as an option
+% 1) Verify use of Moore-Penrose pseudoinverse after Infomax ICA 
+% 2) Add SOBI as an option
 
 if nargin < 1; help icasegdata; return; end;
 
@@ -84,17 +84,24 @@ if nargin < 1; help icasegdata; return; end;
     parsevar(varargin,'ncomps',[],'nkeep',[],...
     'fftfreq',50,'extica',1,'badchans',[]);
 
-if (~strcmp(algorithm,'runica')) & (~strcmp(algorithm,'fastica'))
-    error('Algorithm choices are either ''runica'' or ''fastica''');
+if (~strcmp(algorithm,'infomax')) & (~strcmp(algorithm,'fastica'))
+    error('Algorithm choices are either ''infomax'' or ''fastica''');
 end
 
-if strcmp(algorithm,'runica')
+if strcmp(algorithm,'infomax')
     fprintf('Infomax ICA used! Please cite:\n');
     fprintf('\n');
     fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
     fprintf('Independent component analysis of electroencephalographic data.\n');
     fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
     fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+    fprintf('\n');
+elseif strcmp(algorith,'fastica')
+    fprintf('FastICA used! Please cite:\n');
+    fprintf('\n');
+    fprintf('Oja, E., & Hyvarinen, A., \n'); 
+    fprintf('A fast fixed-point algorithm for independent component analysis.\n');
+    fprintf('Neural computation, 9(7), 1483-1492. (1997).\n');
     fprintf('\n');
 end
 
@@ -161,15 +168,26 @@ datain.sep=zeros(ncomps,nchans);
 datain.mix=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
-if extica; tmpstr='extended '; else tmpstr=''; end;
-disp(['Running ' tmpstr 'Infomax ICA on the data...']);
-[w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
+if strcmp(algorithm,'infomax')
+    if extica; tmpstr='extended '; else tmpstr=''; end;
+        disp(['Running ' tmpstr 'Infomax ICA on the data...']);
+        [w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
+        % Put ICA data into the output structure
+        datain.sep(:,goodchans)=w*s;
+        datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
+        icasig=alldata*datain.sep(:,goodchans)';
+        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+    end
+elseif strcmp(algorith,'fastica')
+    disp(['Running ' tmpstr 'FastICA on the data...']);
+        [icasig, A, W]=fastica(alldata','lastEig', ncomps, 'numOfIC', ncomps);
+        % Put ICA data into the output structure
+        datain.sep(:,goodchans)=W;
+        datain.mix(:,goodchans)=A';
+        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+end
 
-% Put ICA data into the output structure
-datain.sep(:,goodchans)=w*s;
-datain.mix=pinv(datain.sep)';
-icasig=alldata*datain.sep(:,goodchans)';
-datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+
 
 disp('Getting percent of variance that each component accounts for...');
 % Uses the average of two different methods, one that overestimates and one
