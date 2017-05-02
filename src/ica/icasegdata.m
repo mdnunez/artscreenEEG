@@ -28,6 +28,9 @@
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
 %
+%    algorithm - string indicating which ICA algorithm to use. 
+%                Choices: 'runica' or 'fastica'. Default: 'runica'
+%
 %    extica-  flag to use the 'extended' infomax ICA, which can separate
 %             sub-gaussian sources such as line noise. Note that the
 %             decomposition will take longer. Default: 1
@@ -68,26 +71,32 @@ function datain = icasegdata(datain,varargin)
 %         12/20/16 - Michael Nunez
 %   1.6 - Change defaults for the number of components to solve for 
 %         and keep, reject from datain.artifact 04/24/17 - Michael Nunez
-
+%   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
+%%%%%UNFINISHED%%%%
 
 %To do:
-% 1) Find fastica alogirthm, add fastica as an option
-% 2) Add SOBI as an option
+% 1) Add SOBI as an option
 
 if nargin < 1; help icasegdata; return; end;
 
 % Parse inputs;
-[~,ncomps,nkeep,fftfreq,extica,badchans]=...
+[~,ncomps,nkeep,fftfreq,algorithm,extica,badchans]=...
     parsevar(varargin,'ncomps',[],'nkeep',[],...
     'fftfreq',50,'extica',1,'badchans',[]);
 
-fprintf('Infomax ICA used! Please cite:\n');
-fprintf('\n');
-fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
-fprintf('Independent component analysis of electroencephalographic data.\n');
-fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
-fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
-fprintf('\n');
+if (~strcmp(algorithm,'runica')) & (~strcmp(algorithm,'fastica'))
+    error('Algorithm choices are either ''runica'' or ''fastica''');
+end
+
+if strcmp(algorithm,'runica')
+    fprintf('Infomax ICA used! Please cite:\n');
+    fprintf('\n');
+    fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
+    fprintf('Independent component analysis of electroencephalographic data.\n');
+    fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
+    fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+    fprintf('\n');
+end
 
 % Determined from the data
 nsamps=size(datain.data,1);
