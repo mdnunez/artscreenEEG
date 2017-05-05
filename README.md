@@ -66,3 +66,7 @@ Neural computation, 9(7), 1483-1492. (1997).
 Mognon A, Bruzzone L, Jovicich J, Buiatti M, 
 [ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Spatial and Temporal features.](https://www.researchgate.net/publication/45268818_ADJUST_An_automatic_EEG_artifact_detector_based_on_the_joint_use_of_spatial_and_temporal_features) 
 Psychophysiology 48 (2), 229-240 (2011).
+
+Nunez, M. D., Vandekerckhove, J., & Srinivasan, R. 
+[How attention influences perceptual decision making: Single-trial EEG correlates of drift-diffusion model parameters.](https://www.researchgate.net/publication/298275031_How_attention_influences_perceptual_decision_making_Single-trial_EEG_correlates_of_drift-diffusion_model_parameters) 
+Journal of Mathematical Psychology, 76, 117-130. (2017).
