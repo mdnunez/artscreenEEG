@@ -27,8 +27,6 @@
 
 function datain = lapdata(datain,varargin)
 
-%%%%UNFINISHED%%%%%
-
 % VERSION HISTORY:
 %   1.0 - created by Michael Nunez  4/24/17
 
