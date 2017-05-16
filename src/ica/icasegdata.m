@@ -72,38 +72,24 @@ function datain = icasegdata(datain,varargin)
 %   1.6 - Change defaults for the number of components to solve for 
 %         and keep, reject from datain.artifact 04/24/17 - Michael Nunez
 %   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
+%   1.8 - Change default to FastICA algorithm, adding try statement for 
+%         Infomax ICA 5/15/17 - Michael Nunez
+%
 
 %To do:
-% 1) Verify use of Moore-Penrose pseudoinverse after Infomax ICA
-% 2) Add 'verbose' flag 
+% 1) Fix Infomax ICA matrix multiplication
+% 2) Verify use of Moore-Penrose pseudoinverse after Infomax ICA
 % 3) Add SOBI as a feature to artscreenEEG
 
 if nargin < 1; help icasegdata; return; end;
 
 % Parse inputs;
-[~,ncomps,nkeep,fftfreq,algorithm,extica,badchans]=...
+[~,ncomps,nkeep,fftfreq,algorithm,extica,badchans,verbose]=...
     parsevar(varargin,'ncomps',[],'nkeep',[],...
-    'fftfreq',50,'algorithm','infomax','extica',1,'badchans',[]);
+    'fftfreq',50,'algorithm','fastica','extica',1,'badchans',[],'verbose','off');
 
 if (~strcmp(algorithm,'infomax')) & (~strcmp(algorithm,'fastica'))
     error('Algorithm choices are either ''infomax'' or ''fastica''');
-end
-
-if strcmp(algorithm,'infomax')
-    fprintf('Infomax ICA used! Please cite:\n');
-    fprintf('\n');
-    fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
-    fprintf('Independent component analysis of electroencephalographic data.\n');
-    fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
-    fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
-    fprintf('\n');
-elseif strcmp(algorithm,'fastica')
-    fprintf('FastICA used! Please cite:\n');
-    fprintf('\n');
-    fprintf('Oja, E., & Hyvarinen, A., \n'); 
-    fprintf('A fast fixed-point algorithm for independent component analysis.\n');
-    fprintf('Neural computation, 9(7), 1483-1492. (1997).\n');
-    fprintf('\n');
 end
 
 % Determined from the data
@@ -169,18 +155,34 @@ datain.sep=zeros(ncomps,nchans);
 datain.mix=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
+infomaxerr = 0;
 if strcmp(algorithm,'infomax')
-    if extica; tmpstr='extended '; else tmpstr=''; end;
-    disp(['Running ' tmpstr 'Infomax ICA on the data...']);
-    [w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
-    % Put ICA data into the output structure
-    datain.sep(:,goodchans)=w*s;
-    datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
-    icasig=alldata*datain.sep(:,goodchans)';
-    datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
-elseif strcmp(algorithm,'fastica')
+    try
+        if extica; tmpstr='extended '; else tmpstr=''; end;
+        disp(['Running ' tmpstr 'Infomax ICA on the data...']);
+        [w,s]=runica(alldata','verbose',verbose,'pca',ncomps,'extended',extica);
+        % Put ICA data into the output structure
+        datain.sep(:,goodchans)=w*s;
+        datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
+        icasig=alldata*datain.sep(:,goodchans)';
+        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+
+        fprintf('Infomax ICA used! Please cite:\n');
+        fprintf('\n');
+        fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
+        fprintf('Independent component analysis of electroencephalographic data.\n');
+        fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
+        fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+        fprintf('\n');
+    catch me
+        rethrow(me);
+        fprintf('Error given by Infomax ICA. Switching to FastICA algorithm...\n');
+        infomaxerr = 1;
+    end
+end
+if strcmp(algorithm,'fastica') || infomaxerr == 1
     disp(['Running FastICA on the data...']);
-        [outsig, A, W]=fastica(alldata','verbose','off','lastEig', ncomps, 'numOfIC', ncomps);
+        [outsig, A, W]=fastica(alldata','verbose',verbose,'lastEig', ncomps, 'numOfIC', ncomps);
         if ncomps ~= size(W,1);
             ncomps = size(W,1);
             fprintf('FastICA only found %d components, resetting ncomps to %d...\n',ncomps);
@@ -194,6 +196,13 @@ elseif strcmp(algorithm,'fastica')
         datain.mix(:,goodchans)=A';
         icasig = outsig';
         datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+
+        fprintf('FastICA used! Please cite:\n');
+        fprintf('\n');
+        fprintf('Oja, E., & Hyvarinen, A., \n'); 
+        fprintf('A fast fixed-point algorithm for independent component analysis.\n');
+        fprintf('Neural computation, 9(7), 1483-1492. (1997).\n');
+        fprintf('\n');
 end
 
 

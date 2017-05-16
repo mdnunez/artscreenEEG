@@ -1,10 +1,10 @@
 <img src="./extra/logo.png" width="128">
 
-# artscreenEEG
+# artscreenEEG 0.3
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Mark Dennison, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
-artscreenEEG is a MATLAB function package to perform basic artifact correction on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use these functions. 
+artscreenEEG 0.3 is a MATLAB function package to perform basic artifact correction on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use these functions. 
 
 This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings, whether collected from the users' own labs or collected at other locations. Note that it is the view of the authors that all EEG recordings contain some amount of artifact and software tools can only mitigate this problem, despite claims by many EEG scientists.
 
@@ -70,3 +70,6 @@ Psychophysiology 48 (2), 229-240 (2011).
 Nunez, M. D., Vandekerckhove, J., & Srinivasan, R. 
 [How attention influences perceptual decision making: Single-trial EEG correlates of drift-diffusion model parameters.](https://www.researchgate.net/publication/298275031_How_attention_influences_perceptual_decision_making_Single-trial_EEG_correlates_of_drift-diffusion_model_parameters) 
 Journal of Mathematical Psychology, 76, 117-130. (2017).
+
+### Version
+The newest version of artscreenEEG is 0.3 indicating that artscreenEEG is still being developed (version 0)
