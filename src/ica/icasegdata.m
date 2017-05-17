@@ -29,7 +29,7 @@
 %             spectra.  Default: 50
 %
 %    algorithm - string indicating which ICA algorithm to use. 
-%                Choices: 'infomax' or 'fastica'. Default: 'infomax'
+%                Choices: 'infomax' or 'fastica'. Default: 'fastica'
 %
 %    extica-  flag to use the 'extended' infomax ICA, which can separate
 %             sub-gaussian sources such as line noise. Note that the
