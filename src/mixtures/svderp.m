@@ -1,6 +1,8 @@
 % function newdata = svderp(datain,varargin)
 %
-% This function performs an SVD decomposition of segmented data.
+% This function performs a singular-value decomposition (SVD) of averaged EEG data (ERP). 
+% Thereby obtaining single-trial estimates of ERP data by weight-averaging across
+% channels on single-trials where the weights are obtained by SVD of the averaged EEG data
 %
 % The returned data structure has all of the original fields, plus now
 % includes unmixing matrices, as well as amplitude spectra
@@ -28,6 +30,8 @@
 %
 %    badchans - channels that are not zeroed out but should be considered
 %               bad and excluded from the SVDERP.
+%
+%    saveUSV - Save U S V matrices from the singular-value decompositon
 %                    
 %
 % Copyright (C) 2017 Michael D. Nunez, <mdnunez1@uci.edu>
@@ -51,15 +55,16 @@ function datain = svderp(datain,varargin)
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
 %  05/01/17       Michael Nunez          Converted from icasegdata.m
+%  05/18/17       Michael Nunez    saveUSV flag and better description
 
 
 if nargin < 1; help svderp; return; end;
 
 % Parse inputs;
-[~,erpwind,baseline,erptrials,ncomps,fftfreq,badchans]=...
+[~,erpwind,baseline,erptrials,ncomps,fftfreq,badchans,saveUSV]=...
     parsevar(varargin,'erpwind',1:size(datain.data,1),...
         'baseline',[],'erptrials',1:size(datain.data,3),'ncomps',[],...
-        'fftfreq',50,'badchans',[]);
+        'fftfreq',50,'badchans',[],'saveUSV',0);
 
 fprintf('SVD ERP used! Please cite:\n');
 fprintf('\n');
@@ -136,6 +141,11 @@ datain.sep=V(:, 1:ncomps)';
 datain.mix=datain.sep;
 cmpsig=alldata*datain.sep';
 datain.cmp=cattoseg(cmpsig,nsamps);
+if saveUSV
+datain.svd.U = U;
+datain.svd.S = S;
+datain.svd.V = V;
+end
 
 disp('Getting percent of variance that each component accounts for...');
 cpvars=diag(S.^2)/sum(diag(S.^2))*100;
