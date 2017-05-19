@@ -19,14 +19,17 @@
 %
 %    ncomps-  the number of components to solve for. Must be <= the number 
 %             of channels and have > ncomps^3 good samples of
-%             data. Default: min([60 nchans round(goodsamps^(1/3))])
+%             data. Default: min([nchans round(goodsamps^(1/3))])
 %
 %    nkeep-   the number of components to retain for review. The comps
 %             are sorted by variance, thus only minor artifacts comprise
-%             the later components. Defaut: min([40 ncomps])
+%             the later components. Defaut: ncomps
 %
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
+%
+%    algorithm - string indicating which ICA algorithm to use. 
+%                Choices: 'infomax' or 'fastica'. Default: 'fastica'
 %
 %    extica-  flag to use the 'extended' infomax ICA, which can separate
 %             sub-gaussian sources such as line noise. Note that the
@@ -62,28 +65,32 @@ function datain = icasegdata(datain,varargin)
 %   1.2 - Some changes to default values 7/1/13
 %   1.3 - Now calculates the percentage of the variance in the data 
 %          that each component accounts for.  7/15/13    
-%   1.4 - Changed the default number of components to solve for. 8/23/16 -Michael Nunez 
-%   1.5 - Export citation to the terminal when Infomax ICA. 12/20/16 - Michael Nunez
+%   1.4 - Changed the default number of components to solve for. 
+%         8/23/16 -Michael Nunez 
+%   1.5 - Export citation to the terminal when Infomax ICA. 
+%         12/20/16 - Michael Nunez
+%   1.6 - Change defaults for the number of components to solve for 
+%         and keep, reject from datain.artifact 04/24/17 - Michael Nunez
+%   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
+%   1.8 - Change default to FastICA algorithm, adding try statement for 
+%         Infomax ICA 5/15/17 - Michael Nunez
+%
 
 %To do:
-% 1) Find fastica alogirthm, add fastica as an option
-% 2) Add SOBI as an option
-% 3) Change default to KEEP random components?
+% 1) Fix Infomax ICA matrix multiplication
+% 2) Verify use of Moore-Penrose pseudoinverse after Infomax ICA
+% 3) Add SOBI as a feature to artscreenEEG
 
 if nargin < 1; help icasegdata; return; end;
 
 % Parse inputs;
-[~,ncomps,nkeep,fftfreq,extica,badchans]=...
+[~,ncomps,nkeep,fftfreq,algorithm,extica,badchans,verbose]=...
     parsevar(varargin,'ncomps',[],'nkeep',[],...
-    'fftfreq',50,'extica',1,'badchans',[]);
+    'fftfreq',50,'algorithm','fastica','extica',1,'badchans',[],'verbose','off');
 
-fprintf('Infomax ICA used! Please cite:\n');
-fprintf('\n');
-fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
-fprintf('Independent component analysis of electroencephalographic data.\n');
-fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
-fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
-fprintf('\n');
+if (~strcmp(algorithm,'infomax')) & (~strcmp(algorithm,'fastica'))
+    error('Algorithm choices are either ''infomax'' or ''fastica''');
+end
 
 % Determined from the data
 nsamps=size(datain.data,1);
@@ -94,6 +101,12 @@ tlength=nsamps/datain.sr;
 disp('Assuming all non-zero and non-NaN data are good...');
 thevars=squeeze(var(datain.data));
 artifact=thevars==0 | isnan(thevars);
+
+if isfield(datain,'artifact')
+     disp('Rejecting data from .artifact field matrix...');
+     artifact = datain.artifact | artifact;
+end
+
 goodtrials=setdiff(1:ntrials,find(sum(artifact)==nchans));
 goodchans=setdiff(1:nchans,find(sum(artifact,2)==ntrials));
 goodchans=setdiff(goodchans,badchans);
@@ -102,24 +115,23 @@ ngoodtrials=length(goodtrials);
 
 % Choose reasonable number of components to solve for if not given
 if isempty(ncomps);
-    ncomps=min([60 ngoodchans round((ngoodtrials*nsamps)^(1/3))]);
+    ncomps=min([ngoodchans round((ngoodtrials*nsamps)^(1/3))]);
     disp(['Solving for ' num2str(ncomps) ' components...']);
 end
 
-% Keeps top 60 components. Smaller ones contribute insignificant variance
-% for the most part
+% Smaller components contribute insignificant variance for the most part
 if isempty(nkeep);
-    nkeep=min([60 ncomps]);
+    nkeep=ncomps;
 end
 
 % Checks for bad inputs
 if ncomps > ngoodchans;
-    disp('ncomps cannot be greater than ngoodchans, resetting ncomps to ngoodchans...');
+    fprintf('ncomps cannot be greater than ngoodchans, resetting ncomps to %d...\n',ngoodchans);
     ncomps=ngoodchans;
 end
 if ncomps > round((ngoodtrials*nsamps)^(1/3));
-    ncomps=round((ngoodtrials*nsamps)^(1/3));
-    disp(['Not enough samples per component, lowering ncomps to ' num2str(ncomps) '...']);
+    suggested_ncomps=round((ngoodtrials*nsamps)^(1/3));
+    warning(['Possibly not enough samples per component. It is recommended to lower ncomps to ' num2str(suggested_ncomps) '...']);
 end
 if nkeep > ncomps;
     disp('nkeep cannot be greater than ncomps, resetting nkeep to ncomps...');
@@ -143,15 +155,57 @@ datain.sep=zeros(ncomps,nchans);
 datain.mix=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
-if extica; tmpstr='extended '; else tmpstr=''; end;
-disp(['Running ' tmpstr 'Infomax ICA on the data...']);
-[w,s]=runica(alldata','verbose','off','pca',ncomps,'extended',extica);
+infomaxerr = 0;
+if strcmp(algorithm,'infomax')
+    try
+        if extica; tmpstr='extended '; else tmpstr=''; end;
+        disp(['Running ' tmpstr 'Infomax ICA on the data...']);
+        [w,s]=runica(alldata','verbose',verbose,'pca',ncomps,'extended',extica);
+        % Put ICA data into the output structure
+        datain.sep(:,goodchans)=w*s;
+        datain.mix=pinv(datain.sep)'; %Check use of Moore-Penrose pseudoinverse
+        icasig=alldata*datain.sep(:,goodchans)';
+        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
 
-% Put ICA data into the output structure
-datain.sep(:,goodchans)=w*s;
-datain.mix=pinv(datain.sep)';
-icasig=alldata*datain.sep(:,goodchans)';
-datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+        fprintf('Infomax ICA used! Please cite:\n');
+        fprintf('\n');
+        fprintf('Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J., \n');
+        fprintf('Independent component analysis of electroencephalographic data.\n');
+        fprintf('In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural\n');
+        fprintf('Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).\n');
+        fprintf('\n');
+    catch me
+        rethrow(me);
+        fprintf('Error given by Infomax ICA. Switching to FastICA algorithm...\n');
+        infomaxerr = 1;
+    end
+end
+if strcmp(algorithm,'fastica') || infomaxerr == 1
+    disp(['Running FastICA on the data...']);
+        [outsig, A, W]=fastica(alldata','verbose',verbose,'lastEig', ncomps, 'numOfIC', ncomps);
+        if ncomps ~= size(W,1);
+            ncomps = size(W,1);
+            fprintf('FastICA only found %d components, resetting ncomps to %d...\n',ncomps);
+            datain.ica=zeros(nsamps,ncomps,ntrials);
+            datain.sep=zeros(ncomps,nchans);
+            datain.mix=zeros(ncomps,nchans);
+            datain.cpvars=zeros(1,ncomps);
+        end
+        % Put ICA data into the output structure
+        datain.sep(:,goodchans)=W;
+        datain.mix(:,goodchans)=A';
+        icasig = outsig';
+        datain.ica(:,:,goodtrials)=cattoseg(icasig,nsamps);
+
+        fprintf('FastICA used! Please cite:\n');
+        fprintf('\n');
+        fprintf('Oja, E., & Hyvarinen, A., \n'); 
+        fprintf('A fast fixed-point algorithm for independent component analysis.\n');
+        fprintf('Neural computation, 9(7), 1483-1492. (1997).\n');
+        fprintf('\n');
+end
+
+
 
 disp('Getting percent of variance that each component accounts for...');
 % Uses the average of two different methods, one that overestimates and one

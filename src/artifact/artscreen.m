@@ -62,12 +62,11 @@
 % ADDITIONAL CAPABILITIES:
 % Flat channels (zero variance) will automatically be labeled as artifact.
 %
-% The data is average referenced at the end of the artifact screening
-% process, plus you have the option of average referencing during the
-% screening process if you find and large artifacts that have bled into
-% other channels due to recording with a hardware average reference such
-% as found in the ANT EEG system.  The value that has been subtracted from
-% every channel is retained in the .avgref field of the data structure.
+% You have the option of average referencing during the screening process 
+% if you find and large artifacts that have bled into other channels due 
+% to recording with a hardware average reference such as found in the 
+% ANT EEG system.  The value that has been subtracted from every channel is 
+% retained in the .avgref field of the data structure.
 %
 % By default, any channels that are rejected will be replaced with new data
 % that is interpolated from neighboring channels using a spline function.
@@ -176,6 +175,18 @@ function datain = artscreen(datain,varargin)
 %         12/14/16 - Michael Nunez
 %   2.5 - No reason to keep saving headmodels. 'hm' field can now be a string
 %         12/19/16 - Michael Nunez
+%   2.6 - Added spline interpolation and spherical Laplacian buttons 
+%         03/10/17 - Michael Nunez
+%   2.7 - Remove average reference default 
+%         03/31/17 - Michael Nunez
+%   2.8 - Sets NaN data as artifact, fix interpolation after closing GUI,
+%         Remove Laplacian button (see lapdata.m)
+%         04/28/17 - Michael Nunez
+%   2.9 - Enable average reference button after artifact removal
+%         05/01/17 - Michael Nunez
+ 
+%To do:
+% 1) Track and display spline interpolated data
 
 if nargin < 1; help artscreen; return; end;
 
@@ -260,11 +271,14 @@ else
 end
 
 % Set spacing between channels on timeseries view
-chansep=5*mean(mean(sqrt(thevars)));
+chansep=5*nanmean(nanmean(sqrt(thevars)));
 datascale=1;
 
-% Sets flat channels as artifact
+% Sets flat data as artifact
 datain.artifact(thevars==0)=1;
+
+% Sets NaN data as artifact
+datain.artifact(isnan(thevars))=1;
 
 % Makes the GUI
 screensize=get(0,'ScreenSize');
@@ -345,6 +359,10 @@ rawvarbutton=uicontrol('units','norm','pos',[3.25/30 19.1/20 2/30 .75/20],...
 tseriesbutton=uicontrol('units','norm','pos',[5.5/30 19.1/20 2/30 .75/20],...
     'style','pushbutton','string','T. Series','Enable','on',...
     'callback',@goTseries_callback);
+
+interpbutton=uicontrol('units','norm','pos',[14.5/30 19.1/20 2/30 .75/20],...
+    'style','pushbutton','string','Interp','Enable','on',...
+    'callback',@Interp_callback);
 
 back10button=uicontrol('units','norm','pos',[.025 .025 .04 .04],...
     'style','pushbutton','string','<<','callback',@Back10Trials_callback,'visible','off');
@@ -544,18 +562,7 @@ end
 
 % Data Interpolation
 if interpflag
-    disp('Interpolating rejected channels...');
-    chanpos=datain.hm.Electrode.CoordOnSphere;
-    interpchans=setdiff(1:size(chanpos,1),datain.hm.Electrode.NoInterp);
-    
-    for t=goodtrials
-        mat=splineinterp(.1,chanpos(interpchans(datain.artifact(interpchans,t)==0),:),chanpos(interpchans,:));
-        if cellmode
-            datain.data{t}(:,interpchans)=datain.data{t}(:,interpchans(datain.artifact(interpchans,t)==0))*mat';
-        else
-            datain.data(:,interpchans,t)=datain.data(:,interpchans(datain.artifact(interpchans,t)==0),t)*mat';
-        end
-    end
+    Interp_callback;
     interpdone=1;
 end
 
@@ -564,8 +571,10 @@ if strhmodel
     datain.hm = hmname;
 end
 
-% Average reference final output
-doAvgRef;
+
+% % Average reference final output
+% doAvgRef;
+
 
 
 %% Nested Functions: These share a workspace with the main function********
@@ -575,7 +584,7 @@ doAvgRef;
         % This function average references the data. Artifact channels are
         % not included in the average.
         
-        disp('Average referencing the data...');
+        fprintf('Average referencing the data...\n');
         
         if ~interpdone
             % Zero out all rejected data first
@@ -612,6 +621,29 @@ doAvgRef;
         
     end % end of doAvgRef
 
+    function Interp_callback(~,~,~)
+        % Performs a spline interpolation on the data
+        fprintf('Interpolating rejected channels...\n');
+        chanpos=datain.hm.Electrode.CoordOnSphere;
+        if isfield(datain.hm.Electrode,'NoInterp')
+            interpchans=setdiff(1:size(chanpos,1),datain.hm.Electrode.NoInterp);
+        else
+            interpchans = 1:size(chanpos,1);
+        end
+        
+        for t=goodtrials
+            mat=splineinterp(.1,chanpos(interpchans(datain.artifact(interpchans,t)==0),:),chanpos(interpchans,:));
+            if cellmode
+                datain.data{t}(:,interpchans)=datain.data{t}(:,interpchans(datain.artifact(interpchans,t)==0))*mat';
+            else
+                datain.data(:,interpchans,t)=datain.data(:,interpchans(datain.artifact(interpchans,t)==0),t)*mat';
+            end
+        end
+        interpdone = 1;
+        %set(interpbutton,'Enable','off');
+        done = 1;
+    end % end of Interp_callback
+
     function AvgRef_callback(~,~,~)
         % Performs average referencing of the data
         doAvgRef;
@@ -623,6 +655,7 @@ doAvgRef;
         else
             thevars=squeeze(var(datain.data));
         end
+        set(avgrefbutton,'Enable','off');
         done=1;
     end % end of AvgRef_callback
 
@@ -661,7 +694,7 @@ doAvgRef;
         SetTimeseriesVisible;
         SetFontsizes;
         done=1;
-    end % end of goRaw_callback
+    end % end of goTseries_callback
 
     function Plot_callback(~,~,~)
         % This Callback function is used to plot individual trials. The spacing
@@ -704,6 +737,10 @@ doAvgRef;
             done=1;
             return;
         end
+
+        interpdone = 0;
+        set(interpbutton,'Enable','on');
+        set(avgrefbutton,'Enable','on');
         
         if isempty(rejtrials); rejtrials=1:ntrials; end;
         if isempty(rejchans); rejchans=1:nchans; end;
@@ -816,6 +853,7 @@ doAvgRef;
         set(normvarbutton,'fontsize',round(basefontsize*.6));
         set(rawvarbutton,'fontsize',round(basefontsize*.6));
         set(tseriesbutton,'fontsize',round(basefontsize*.6));
+        set(interpbutton,'fontsize',round(basefontsize*.6));
         
         if showtimeseries
             set(back10button,'fontsize',round(basefontsize*.6));
