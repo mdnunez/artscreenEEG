@@ -4,7 +4,7 @@
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Mark Dennison, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
-artscreenEEG 0.3 is a MATLAB function package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
+artscreenEEG 0.3 is a MATLAB package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
 
 This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings and perform basic EEG analysis, whether collected from the users' own labs or collected at other locations. 
 
