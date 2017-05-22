@@ -4,17 +4,19 @@
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Mark Dennison, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
-artscreenEEG 0.3 is a MATLAB function package to perform basic artifact correction on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use these functions. 
+artscreenEEG 0.3 is a MATLAB function package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
 
-This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings, whether collected from the users' own labs or collected at other locations. Note that it is the view of the authors that all EEG recordings contain some amount of artifact and software tools can only mitigate this problem, despite claims by many EEG scientists.
+This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings and perform basic EEG analysis, whether collected from the users' own labs or collected at other locations. 
+
+While it is the view of the authors that all EEG recordings contain some amount of artifact and existing software tools can only mitigate this problem, specific analyses (such as band-limited EEG analyses) are more immune to this artifact. See Further Reading for analysis help.
 
 ## Getting Started
 
 ### Prerequisites
 
-This software probably requires [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly earlier. Currently, the software was only extensively tested on R2014a. Later versions of MATLAB have not been extensively tested. On later versions some functions may be slow due to GUI drawing changes made by MathWorks.
-
 This software should work on any operating system that runs the correct version of MATLAB.
+
+This software requires [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly older MATLAB versions. In newer versions of MATLAB some graphical functions may be slower due to GUI drawing changes made by MathWorks (to be fixed in artscreenEEG version 0.4).
 
 ### Downloading
 
@@ -49,15 +51,9 @@ artscreenEEG is licensed under the GNU General Public License v3.0 and written b
 
 ### Further Reading
 
-Possible EEG artifact correction reference and citation:
-Section 6 and Figure 4 of [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)
+EEG analysis and artifact correction (see Section 6 for a discussion on EEG artifact correction): [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)
 
 ### References
-
-Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J.,
-[Independent component analysis of electroencephalographic data.](https://www.researchgate.net/publication/2242002_Independent_Component_Analysis_of_Electroencephalographic_Data)
-In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural 
-Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).
 
 Oja, E., & Hyvarinen, A., 
 A fast fixed-point algorithm for independent component analysis. 
@@ -66,6 +62,11 @@ Neural computation, 9(7), 1483-1492. (1997).
 Mognon A, Bruzzone L, Jovicich J, Buiatti M, 
 [ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Spatial and Temporal features.](https://www.researchgate.net/publication/45268818_ADJUST_An_automatic_EEG_artifact_detector_based_on_the_joint_use_of_spatial_and_temporal_features) 
 Psychophysiology 48 (2), 229-240 (2011).
+
+Makeig, S., Bell, A.J., Jung, T-P and Sejnowski, T.J.,
+[Independent component analysis of electroencephalographic data.](https://www.researchgate.net/publication/2242002_Independent_Component_Analysis_of_Electroencephalographic_Data)
+In: D. Touretzky, M. Mozer and M. Hasselmo (Eds). Advances in Neural 
+Information Processing Systems 8:145-151, MIT Press, Cambridge, MA (1996).
 
 Nunez, M. D., Vandekerckhove, J., & Srinivasan, R. 
 [How attention influences perceptual decision making: Single-trial EEG correlates of drift-diffusion model parameters.](https://www.researchgate.net/publication/298275031_How_attention_influences_perceptual_decision_making_Single-trial_EEG_correlates_of_drift-diffusion_model_parameters) 
