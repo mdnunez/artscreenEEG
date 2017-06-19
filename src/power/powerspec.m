@@ -40,7 +40,8 @@ function [xfreqs, outpower, fourier] = powerspec(datain,varargin)
 %% Record of Revisions
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
-%  09/08/16       Michael Nunez              Adapted from eegPower
+%  09/08/16       Michael Nunez              Adapted from 
+%  09/16/17       Michael Nunez         Don't plot artifact trials
 
 %% Frequency interval
 
@@ -72,7 +73,10 @@ plotfreqs = 0:nsr:freqs(2);
 [~,minindex] = min(abs(freqs(1)-plotfreqs));
 maxindex = length(plotfreqs);
 
-power = mean(abs(fourier).^2,3)*(2/(nsr)); %Power in standardized units (\muV^2/Hz)
+%Find good trials
+goodtrials = ~all(datain.artifact,1);
+
+power = mean(abs(fourier(:,:,goodtrials)).^2,3)*(2/(nsr)); %Power in standardized units (\muV^2/Hz)
 if dB
     power = 10*log10(power);
 end
