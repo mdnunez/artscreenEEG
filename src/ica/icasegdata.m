@@ -74,6 +74,7 @@ function datain = icasegdata(datain,varargin)
 %   1.7 - Addition of FastICA algorithm 05/02/17 - Michael Nunez
 %   1.8 - Change default to FastICA algorithm, adding try statement for 
 %         Infomax ICA 5/15/17 - Michael Nunez
+%   1.9 - Fixing FastICA ncomp and nkeep error 7/11/17 - Michael Nunez
 %
 
 %To do:
@@ -184,8 +185,12 @@ if strcmp(algorithm,'fastica') || infomaxerr == 1
     disp(['Running FastICA on the data...']);
         [outsig, A, W]=fastica(alldata','verbose',verbose,'lastEig', ncomps, 'numOfIC', ncomps);
         if ncomps ~= size(W,1);
+            fprintf('FastICA only found %d components, resetting ncomps to %d...\n',ncomps,ncomps);
             ncomps = size(W,1);
-            fprintf('FastICA only found %d components, resetting ncomps to %d...\n',ncomps);
+            if nkeep > ncomps;
+                disp('nkeep cannot be greater than ncomps, resetting nkeep to ncomps...');
+                nkeep=ncomps;
+            end
             datain.ica=zeros(nsamps,ncomps,ntrials);
             datain.sep=zeros(ncomps,nchans);
             datain.mix=zeros(ncomps,nchans);
