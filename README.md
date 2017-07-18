@@ -1,4 +1,5 @@
 <img src="./extra/logo.png" width="128">
+
 # artscreenEEG 0.4.0
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Mark Dennison, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
@@ -15,7 +16,7 @@ While it is the view of the authors that all EEG recordings contain some amount 
 
 This software should work on any operating system that runs the correct version of MATLAB.
 
-This software requires [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly older MATLAB versions. In newer versions of MATLAB some graphical functions may be slower due to GUI drawing changes made by MathWorks (to be fixed in artscreenEEG version 0.4).
+This software requires at least [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly older MATLAB versions. In newer versions of MATLAB some graphical functions may be slower due to GUI drawing changes made by MathWorks.
 
 ### Downloading
 
