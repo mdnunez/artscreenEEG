@@ -42,6 +42,9 @@ if isfield(datain,'data') && ~isfield(datain,'ica');
     datain=rmfield(datain,'data');
 end
 
+% Get required variables
+ncomps=size(datain.ica,2);
+
 % If no channel positions, return error
 if ~isfield(datain,'hm');
     error('No ''hm'' field found. ADJUST algorithm requires a head model!\n');
