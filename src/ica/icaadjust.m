@@ -10,6 +10,9 @@
 % ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Spatial and Temporal features.
 % Psychophysiology 48 (2), 229-240 (2011).
 %
+% This algorithm produces 2s and 0s in field "compevals" where
+%   "Good" is 2 and "Artifact" is 0. For use with icatochan()
+%
 % Automatic Part 3 of artscreenEEG's basic data cleaning functions:
 %    artscreen.m => icasegdata.m => icaadjust.m => icatochan.m (optional)
 %
@@ -52,7 +55,7 @@ end
 
 % Prepare for Component Review
 if ~isfield(datain,'compevals')
-    datain.compevals=NaN(1,ncomps);
+    datain.compevals=ones(1,ncomps)*2;
 end
 
 
@@ -63,6 +66,11 @@ fprintf('ADJUST: An Automatic EEG artifact Detector based on the Joint Use of Sp
 fprintf('Psychophysiology 48 (2), 229-240 (2011).\n');
 EEG = toADJUST(datain);
 art = ADJUST(EEG);
+
+if isempty(art)
+    warning('ADJUST found no artifactual components! Try icareview()!');
+end
+
 datain.compevals(art)=0;
 
 

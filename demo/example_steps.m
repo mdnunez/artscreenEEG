@@ -22,6 +22,7 @@
 %  8/25/16        Michael Nunez       figshare link, updated feedback
 %  12/1/16        Michael Nunez     Download warning only if .mat is non-local
 %  1/17/17        Michael Nunez  Changing name of structure to avoid confusion
+%  8/15/17        Michael Nunez         Use of icaadjust().
 
 %% Initial
 sub = 'subject1';
@@ -67,11 +68,15 @@ ica = icasegdata(eeg,'ncomps',60,'nkeep',60,'fftfreq',100);
 fprintf('%%Saving ICA data...\n');
 save(sprintf('%s_ica.mat',sub),'-struct','ica');
 
-%Review ICA components
-fprintf('%%Review ICA components...\n');
-fprintf('%%Suggested component evaluations are included. Note that IC evaluation is inherently subjective...\n');
-ica.compevals = [0,0,0,2,2,2,0,2,2,0,0,2,1,2,2,0,0,0,1,1,0,0,0,2,0,0,0,0,1,zeros(1,31)];
-ica = icareview(ica);
+% % Manual review of ICA components
+% fprintf('%%Review ICA components...\n');
+% fprintf('%%Suggested component evaluations are included. Note that IC evaluation is inherently subjective...\n');
+% ica.compevals = [0,0,0,2,2,2,0,2,2,0,0,2,1,2,2,0,0,0,1,1,0,0,0,2,0,0,0,0,1,zeros(1,31)];
+% ica = icareview(ica);
+
+% Automatic review of ICA components
+fprintf('%%Automatic review of ICA components...\n');
+ica = icaadjust(ica);
 
 %Save ICA data with component evaluations
 fprintf('%%Overwriting ICA data with evaluated component information...\n');
