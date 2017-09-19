@@ -72,7 +72,7 @@ Journal of Mathematical Psychology, 76, 117-130. (2017).
 
 ## Contributing
 
-## Authorship
+### Authorship
 
 Please submit issues and associated pull requests. All .m code contributors will be listed as authors. All other contributors will be mentioned in the documentation.
 
