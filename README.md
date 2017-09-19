@@ -1,12 +1,12 @@
 <img src="./extra/logo.png" width="128">
 
-# artscreenEEG 0.7.1
+# artscreenEEG 0.7.2
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
 **Head model contributors: Mark Dennison, Jacky Au, Inez Falcon, and Derek C. Monroe at the University of California, Irvine**
 
-artscreenEEG 0.7.1 is a MATLAB package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
+artscreenEEG 0.7.2 is a MATLAB package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
 
 This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings and perform basic EEG analysis, whether collected from the users' own labs or collected at other locations. 
 
@@ -18,7 +18,7 @@ While it is the view of the authors that all EEG recordings contain some amount 
 
 This software should work on any operating system that runs the correct version of MATLAB.
 
-This software requires at least [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly older MATLAB versions. In newer versions of MATLAB some graphical functions may be slower due to GUI drawing changes made by MathWorks.
+This software works best with [MATLAB R2014a](http://www.mathworks.com/products/matlab/) or slighly older MATLAB versions. This software works with newer versions of MATLAB however some graphical functions may be slower due to GUI drawing changes made by MathWorks.
 
 ### Downloading
 
@@ -47,10 +47,6 @@ edit example_steps.m;
 example_steps;
 ```
 
-### License
-
-artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, Mark Dennison, Jacky Au, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
-
 ### Further Reading
 
 EEG analysis and artifact correction (see Section 6 for a discussion on EEG artifact correction): [Electroencephalography (EEG): neurophysics, experimental methods, and signal processing](https://www.researchgate.net/publication/290449135_Electroencephalography_EEG_neurophysics_experimental_methods_and_signal_processing)
@@ -74,5 +70,15 @@ Nunez, M. D., Vandekerckhove, J., & Srinivasan, R.
 [How attention influences perceptual decision making: Single-trial EEG correlates of drift-diffusion model parameters.](https://www.researchgate.net/publication/298275031_How_attention_influences_perceptual_decision_making_Single-trial_EEG_correlates_of_drift-diffusion_model_parameters) 
 Journal of Mathematical Psychology, 76, 117-130. (2017).
 
+## Contributing
+
+## Authorship
+
+Please submit issues and associated pull requests. All .m code contributors will be listed as authors. All other contributors will be mentioned in the documentation.
+
+### License
+
+artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
+
 ### Version
-The newest version of artscreenEEG is 0.7.1 indicating that artscreenEEG is still being developed (version 0)
+The newest version of artscreenEEG is 0.7.2 indicating that artscreenEEG is still being developed (version 0)
