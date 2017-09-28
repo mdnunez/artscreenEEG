@@ -3,16 +3,24 @@ function [xfreqs, outpower, fourier] = powerspec(datain,varargin)
 %
 %Useage:  [xfreqs, outpower, fourier] = powerspec(datain,varargin);
 %
-%Inputs:  datain.data - sample*channel*trial EEG data
+%INPUTS:  datain.data - sample*channel*trial EEG data
 %         datain.sr - sample rate
 %
-%Optional Inputs: freqs - lower and upper boundary of frequencies to plot,
-%                         default: [minimum_freq 50] (Hz)
-%                 dB - Units in standardized dB instead of standardized 
-%                      power, default: 0 (false)
-%                 noplot - Suppresses plot, default: 0 (false)
-%                 varargin - Any "plot" inputs after the first two,
-%                            i.e., plot(X,Y,varargin);
+% OPTIONAL ARGUMENTS: (Passed in Name-Value Pairs)
+%
+%   baddata - a chan by trial matrix identifying data that should start
+%             as rejected. If the .artifact field is also present, this
+%             baddata matrix will take precedence. Def = []
+%    freqs - lower and upper boundary of frequencies to plot,
+%            default: [minimum_freq 50] (Hz)
+%
+%       dB - Units in standardized dB instead of standardized 
+%            power, default: 0 (false)
+%
+%      noplot - Suppresses plot, default: 0 (false)
+%
+%      varargin - Any "plot" inputs after the first two,
+%                 i.e., plot(X,Y,varargin);
 %
 %Outputs:  xfreqs - Frequencies plotted (x-axis)
 %          outpower - Power values plotted (y-axis)
@@ -42,10 +50,23 @@ function [xfreqs, outpower, fourier] = powerspec(datain,varargin)
 %   ====        =================            =====================
 %  09/08/16       Michael Nunez              Adapted from 
 %  09/16/17       Michael Nunez         Don't plot artifact trials
+%  09/25/17       Michael Nunez         Fix for no .artifact field
 
 %% Frequency interval
 
-[plotvarargin,freqs,dB,noplot] = parsevar(varargin,'freqs',[0 50],'dB',0,'noplot',0);
+[plotvarargin,freqs,dB,noplot] = parsevar(varargin,'baddata',[],'freqs',[0 50],'dB',0,'noplot',0);
+
+nchans=size(datain.data,2);
+ntrials=size(datain.data,3);
+
+% If a baddata matrix was entered as an argument
+if ~isempty(baddata),
+    datain.artifact=baddata; 
+end
+
+if ~isfield(datain,'artifact'),
+    datain.artifact=zeros(nchans,ntrials);
+end
 
 %Recalculate if maximum larger than Nyquist frequency
 nyquist = (2/5)*datain.sr;
@@ -74,7 +95,9 @@ plotfreqs = 0:nsr:freqs(2);
 maxindex = length(plotfreqs);
 
 %Find good trials
+disp('Rejecting bad trials from .artifact field or baddata input matrix...');
 goodtrials = ~all(datain.artifact,1);
+
 
 power = mean(abs(fourier(:,:,goodtrials)).^2,3)*(2/(nsr)); %Power in standardized units (\muV^2/Hz)
 if dB
@@ -82,6 +105,7 @@ if dB
 end
 
 % Set the power of bad channels to NaN
+disp('Rejecting bad channels from .artifact field or baddata input matrix...');
 power(:,all(datain.artifact,2)) = NaN;
 
 if ~noplot
