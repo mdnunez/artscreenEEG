@@ -51,10 +51,11 @@ function [xfreqs, outpower, fourier] = powerspec(datain,varargin)
 %  09/08/16       Michael Nunez              Adapted from 
 %  09/16/17       Michael Nunez         Don't plot artifact trials
 %  09/25/17       Michael Nunez         Fix for no .artifact field
+%  10/05/17       Michael Nunez           Bug fix
 
 %% Frequency interval
 
-[plotvarargin,freqs,dB,noplot] = parsevar(varargin,'baddata',[],'freqs',[0 50],'dB',0,'noplot',0);
+[plotvarargin,baddata,freqs,dB,noplot] = parsevar(varargin,'baddata',[],'freqs',[0 50],'dB',0,'noplot',0);
 
 nchans=size(datain.data,2);
 ntrials=size(datain.data,3);
