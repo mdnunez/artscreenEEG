@@ -29,6 +29,7 @@ function data=filtereeg(data,sr,passband,stopband,stopdB)
 %
 %
 % Copyright (C) 2013 Cort Horton, <chorton@uci.edu>
+% Copyright (C) 2017 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -42,7 +43,9 @@ function data=filtereeg(data,sr,passband,stopband,stopdB)
 %
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-
+%
+% To do:
+% Use: parsevar()
 if nargin < 5; stopdB = 10; end;
 if nargin < 3 || isempty(passband) || isempty(stopband); 
     passband=[1 50];
@@ -52,7 +55,9 @@ if length(stopdB)==1; stopdB=ones(1,3) * stopdB; end;
 stopdB=stopdB/2; % filtfilt doubles attenuation, so we divide by two
 
 % detects if input is a structure
+convertback = 0;
 if isstruct(data)
+    convertback = 1;
     tmp=data;
     sr=data.sr;
     if isfield(data,'eeg')
@@ -116,7 +121,7 @@ Hd = design(h, 'butter', 'MatchExactly', match);
 data=filtfilthd(Hd,data);
 
 % if structure input, return output to structure form
-if nargin == 1;
+if convertback;
     tmp.(datafieldname)=data;
     data=tmp;
 end
