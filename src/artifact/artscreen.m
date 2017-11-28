@@ -184,9 +184,9 @@ function datain = artscreen(datain,varargin)
 %         04/28/17 - Michael Nunez
 %   2.9 - Enable average reference button after artifact removal
 %         05/01/17 - Michael Nunez
- 
-%To do:
-% 1) Track and display spline interpolated data
+%   3.0 - Do not zero out interpolated data
+%         11/28/17 - Michael Nunez
+
 
 if nargin < 1; help artscreen; return; end;
 
@@ -239,6 +239,11 @@ end
 if ~isempty(badtrials)
     disp('Rejecting trials from the badtrials list...');
     datain.artifact(:,badtrials)=1;
+end
+
+%If interp field is absent, make this field
+if ~isfield(datain,'interp')
+    datain.interp=zeros(nchans,ntrials);
 end
 
 % If no channel positions, disable the topo and interpolation
@@ -551,14 +556,14 @@ end
 datain.artifact=sum(datain.artifact,3);
 datain.artifact(datain.artifact>1)=1;
 
-% Zero out all rejected data
-if cellmode
-    for t=1:ntrials;
-        datain.data{t}(:,datain.artifact(:,t)==1)=0;
-    end
-else
-    datain.data(:,datain.artifact==1)=0;
-end
+% % Zero out all rejected data
+% if cellmode
+%     for t=1:ntrials;
+%         datain.data{t}(:,datain.artifact(:,t)==1)=0;
+%     end
+% else
+%     datain.data(:,datain.artifact==1)=0;
+% end
 
 % Data Interpolation
 if interpflag
@@ -638,6 +643,7 @@ end
             else
                 datain.data(:,interpchans,t)=datain.data(:,interpchans(datain.artifact(interpchans,t)==0),t)*mat';
             end
+            datain.interp(interpchans(datain.artifact(interpchans,t)==1),t) = 1;
         end
         interpdone = 1;
         %set(interpbutton,'Enable','off');
