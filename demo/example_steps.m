@@ -24,6 +24,7 @@
 %  1/17/17        Michael Nunez  Changing name of structure to avoid confusion
 %  8/15/17        Michael Nunez         Use of icaadjust().
 %  12/27/17       Michael Nunez  Open icareview() after icaadjust(), fix last save
+%  12/28/17       Michael Nunez         Laplacian
 
 %% Initial
 sub = 'subject1';
@@ -108,6 +109,10 @@ eeg.data=filtfilthd(Hd,eeg.data);
 %Remove any probable bad trials observed during "icareview"
 fprintf('%%A second pass of artscreen() is recommended...\n');
 eeg = artscreen(eeg);
+
+%Calculate Spherical Laplacian
+fprintf('%%Calculate spherical Laplacian using sphlapdata()...\n');
+eeg = sphlapdata(eeg);
 
 %Save cleaned data
 fprintf('%%Saving the cleaned data...\n');
