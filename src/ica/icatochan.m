@@ -29,8 +29,9 @@ function datain = icatochan(datain,evalthresh)
 % VERSION HISTORY:
 %   1.0 - Created by Cort Horton
 %   1.1 - Updates to make compatble with old naming conventions 4/8/13
+%   1.2 - Default option is to keep both Good and Unsure 12/27/17
 
-if nargin <2; evalthresh=2; end;
+if nargin <2; evalthresh=1; end;
 
 % Zero out components that are not going to be projected back into channels
 datain.mix(find(datain.compevals<evalthresh),:)=0;

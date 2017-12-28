@@ -36,6 +36,7 @@ function datain = icaadjust(datain)
 
 % VERSION HISTORY:
 %     1.0 - created by Michael Nunez - 8/14/17
+%     1.1 - Default component label is "Unsure" 12/27/17
 
 
 if nargin < 1; help icaadjust; return; end;
@@ -55,7 +56,7 @@ end
 
 % Prepare for Component Review
 if ~isfield(datain,'compevals')
-    datain.compevals=ones(1,ncomps)*2;
+    datain.compevals=ones(1,ncomps)*1; %Default is unsure
 end
 
 

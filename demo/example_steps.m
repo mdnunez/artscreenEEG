@@ -23,6 +23,7 @@
 %  12/1/16        Michael Nunez     Download warning only if .mat is non-local
 %  1/17/17        Michael Nunez  Changing name of structure to avoid confusion
 %  8/15/17        Michael Nunez         Use of icaadjust().
+%  12/27/17       Michael Nunez  Open icareview() after icaadjust(), fix last save
 
 %% Initial
 sub = 'subject1';
@@ -77,6 +78,8 @@ save(sprintf('%s_ica.mat',sub),'-struct','ica');
 % Automatic review of ICA components
 fprintf('%%Automatic review of ICA components...\n');
 ica = icaadjust(ica);
+fprintf('%%Review ICA components...\n');
+ica = icareview(ica);
 
 %Save ICA data with component evaluations
 fprintf('%%Overwriting ICA data with evaluated component information...\n');
@@ -108,5 +111,5 @@ eeg = artscreen(eeg);
 
 %Save cleaned data
 fprintf('%%Saving the cleaned data...\n');
-save(sprintf('%s_cleaned.mat',sub),'-struct','data');
+save(sprintf('%s_cleaned.mat',sub),'-struct','eeg');
 
