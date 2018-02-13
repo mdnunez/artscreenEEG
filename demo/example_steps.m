@@ -1,6 +1,6 @@
 %EXAMPLE_STEPS - Script that follows the steps to clean data
 %
-% Copyright (C) 2016 Michael D. Nunez, <mdnunez1@uci.edu>
+% Copyright (C) 2018 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 %  8/15/17        Michael Nunez         Use of icaadjust().
 %  12/27/17       Michael Nunez  Open icareview() after icaadjust(), fix last save
 %  12/28/17       Michael Nunez         Laplacian
+%  02/13/18       Michael Nunez         EEG plotter and power spectrum
 
 %% Initial
 sub = 'subject1';
@@ -56,6 +57,11 @@ eeg = load(sprintf('%s.mat',sub)); %Load all variables in structure 'eeg'
 fprintf('%%Adding head model...\n');
 fprintf('%%Alternate spherical head model .mat files are contained in src/hmodels.\n');
 eeg = addhm(eeg,'eginn128');
+
+fprintf('%%Plotting the raw EEG data...\n');
+fprintf('%%Try the left and right arrow keys and key ''e'' to plot certain electrodes...\n');
+ploteeg(eeg);
+
 
 fprintf('%%Loading downloaded data into artscreen()...\n');
 fprintf('%%Try a 300 abs variance cutoff...\n');
@@ -109,6 +115,10 @@ eeg.data=filtfilthd(Hd,eeg.data);
 %Remove any probable bad trials observed during "icareview"
 fprintf('%%A second pass of artscreen() is recommended...\n');
 eeg = artscreen(eeg);
+
+%Calculate power spectrum
+fprintf('%%Calculate the power spectrum using powerspec()...\n');
+[xfreqs, outpower, fourier] = powerspec(eeg);
 
 %Calculate Spherical Laplacian
 fprintf('%%Calculate spherical Laplacian using sphlapdata()...\n');

@@ -186,6 +186,8 @@ function datain = artscreen(datain,varargin)
 %         05/01/17 - Michael Nunez
 %   3.0 - Do not zero out interpolated data
 %         11/28/17 - Michael Nunez
+%   3.1 - Does not return an empty structure during Exit_callback
+%         01/04/18 - Michael Nunez
 
 
 if nargin < 1; help artscreen; return; end;
@@ -804,8 +806,7 @@ end
     end % end of Finished_callback
 
     function Exit_callback(~,~,~)
-        % This exits the artifact screening and returns an empty structure
-        datain=[];
+        % This exits the artifact screening
         exitnow=1;
         done=1;
     end % end of Exit_callback

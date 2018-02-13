@@ -1,12 +1,12 @@
 <img src="./extra/logo.png" width="128">
 
-# artscreenEEG 0.10.0
+# artscreenEEG 0.11.0
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
 **Head model contributors: Mark Dennison, Jacky Au, Inez Falcon, and Derek C. Monroe at the University of California, Irvine**
 
-artscreenEEG 0.10.0 is a MATLAB package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
+artscreenEEG 0.11.0 is a MATLAB package to perform basic artifact correction and analysis on electroencephalographic (EEG) data. Please see demo/example_steps.m for an example of how to use the basic functions. 
 
 This software is intended for users who wish to mitigate the muscle and electrical artifact found in all electroencephalographic (EEG) recordings and perform basic EEG analysis, whether collected from the users' own labs or collected at other locations. 
 
@@ -81,4 +81,4 @@ Please submit issues and associated pull requests. All .m code contributors will
 artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
 
 ### Version
-The newest version of artscreenEEG is 0.10.0 indicating that artscreenEEG is still being developed (version 0)
+The newest version of artscreenEEG is 0.11.0 indicating that artscreenEEG is still being developed (version 0)
