@@ -510,7 +510,7 @@ while 1;
             
             plotdata=datascale*plotdata-chansep*ones(nsamps,1)*(1:nchans);
             
-            cortplotx(mainplotaxis,xlabs,plotdata);
+            plotx(mainplotaxis,xlabs,plotdata);
             hold(mainplotaxis,'on');
             plot(mainplotaxis,[1 1]*prctile(xlabs,90),[-1*(nchans+3)*chansep -1*(nchans+3)*chansep+100*datascale],'k','linewidth',2);
             plot(mainplotaxis,[.9925 1.0075]*prctile(xlabs,90),[-1*(nchans+3)*chansep -1*(nchans+3)*chansep],'k','linewidth',2);

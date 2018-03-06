@@ -3,7 +3,9 @@
 % Loads the named headmodel and adds it to the data structure.
 %
 %   Currently available headmodels: 
-%       egihc128 - newer 64 channel EGI hydrocell nets???
+%       acticap32 - 10-20 system 32 electrode cap
+%       extnd1020 - Extended 10-20 system 64 electrode cap
+%       egihc64 - newer 64 channel EGI hydrocell nets?
 %       egihc128 - newer 128 channel EGI hydrocell nets
 %       egihc256 - newer 256 channel EGI hydrocell nets
 %       egihc256red - newer 256 channel EGI hydrocell minus useless face electrodes
@@ -17,7 +19,7 @@
 % Ex: segdata = addhm(segdata,'egi128');
 %
 % Copyright (C) 2013 Cort Horton, <chorton@uci.edu>
-% Copyright (C) 2016 Michael D. Nunez, <mdnunez1@uci.edu>
+% Copyright (C) 2017 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

@@ -7,10 +7,15 @@ function ploteeg(datain,varargin)
 %         datain.sr - sample rate
 %         datain.marker - 2*channel*trial
 %
-%Optional Inputs:
+% OPTIONAL ARGUMENTS: (Passed in Name-Value Pairs)
 %         chanlabels - 1*channel cell array of channel label strings
+%                   Default: datain.label or 1:nchans
+%
 %         spacer - amplitude spacer between channels
 %                  Default: standard deviation of all samples
+%
+%      varargin - Any "plot" inputs after the first two,
+%                 i.e., plot(X,Y,varargin);
 %
 %See also: POWERSPEC
 
@@ -37,10 +42,10 @@ function ploteeg(datain,varargin)
 %  01/04/18      Michael Nunez     Original code adapted from work by Beth A. Lopour
 %  01/10/18      Michael Nunez              Add markers
 %  02/13/18      Michael Nunez             Printing description of keys available
+%  02/14/18      Michael Nunez           Add channel labels and varargin for plots
 
 %To do:
-% 1) Fix spacing for plotted channels that are far apart
-% 2) Export markers
+% 1) Export markers
 
 %% Frequency interval
 
@@ -48,7 +53,16 @@ nsamps = size(datain.data,1);
 nchans = size(datain.data,2);
 ntrials = size(datain.data,3);
 
-[varargin,chanlabels,spacer] = parsevar(varargin,'chanlabels',1:nchans,'spacer',std(datain.data(:)));
+[varargin,chanlabels,spacer] = parsevar(varargin,'chanlabels',[],'spacer',std(datain.data(:)));
+
+if isempty(chanlabels)
+    if isfield(datain,'label')
+        chanlabels = datain.label;
+    else
+        chanlabels = sprintfc('%d',1:nchans); %Undocumented internal MATLAB function
+    end
+end
+
 
 fprintf('Plotting the data...\n');
 fprintf('The key commands available are left arrow and right arrow and ''e'' key...\n');
@@ -69,7 +83,7 @@ spacing = [0:(nchans-1)]*spacer;
 matspacing = repmat(spacing,[nsamps 1]);
 
 time = (epochtime*(plotepoch-1)+xtick):xtick:(epochtime*plotepoch);
-cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,plotchans));
+cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
 set(gca,'YTick',spacing(plotchans),'YTickLabel',chanlabels(plotchans));
 set(gca,'YLim',[spacing(plotchans(1))-spacer*2 spacing(plotchans(end))+spacer])
 xlabel('Time (sec)');
@@ -112,7 +126,7 @@ end
         end
         xtick = 1/datain.sr; 
         time = (epochtime*(plotepoch-1)+xtick):xtick:(epochtime*plotepoch);
-        cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,plotchans));
+        cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
         set(gca,'YTick',spacing(plotchans),'YTickLabel',chanlabels(plotchans));
         set(gca,'YLim',[spacing(plotchans(1))-spacer*2 spacing(plotchans(end))+spacer])
         xlabel('Time (sec)');

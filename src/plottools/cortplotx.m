@@ -29,12 +29,12 @@ function out = cortplotx(varargin)
 % larger font, thicker border, and a white background 7/6/13
 % Modified by Michael D. Nunez to include custom labels 2/13/18
 
-[varargin,custom]=parsevar(varargin,'custom',{});
+[varargin,custom]=parsevar(varargin,'custom','emptyfill');
 
 h = plot(varargin{:});
 hTxt = text('unit','norm','position',[.05 .9],...
     'string',' ','linewidth',3,'parent',get(h(1),'parent'),'fontsize',16,'margin',4);
-if isempty(custom),
+if strcmp(custom,'emptyfill'),
 	for k = 1:numel(h)
 	    set(h(k),'HitTest','on','DisplayName',num2str(k),...
 	        'ButtonDownFcn',{@lineseriescall,k,hTxt});
