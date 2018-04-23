@@ -50,7 +50,7 @@ h  = fdesign.lowpass(Fpass, Fstop, Apass, Astop, eeg.sr);
 Hd = design(h, 'butter', 'MatchExactly', match);
 
 % Carry out the filtering
-fprintf('%%Lowpass filtering the data at 10 Hz...\n');
+fprintf('%%Lowpass filtering the data at 5 Hz...\n');
 filtered =filtfilthd(Hd,eeg.data);
 
 % Baseline the data
