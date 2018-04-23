@@ -26,6 +26,7 @@
 %  12/27/17       Michael Nunez  Open icareview() after icaadjust(), fix last save
 %  12/28/17       Michael Nunez         Laplacian
 %  02/13/18       Michael Nunez         EEG plotter and power spectrum
+%  04/23/18       Michael Nunez   Replace the filter parameter with the sample rate
 
 %% Initial
 sub = 'subject1';
@@ -105,7 +106,7 @@ Astop = 10;          % Stopband Attenuation (dB)
 match = 'passband';  % Band to match exactly
 
 % Construct an FDESIGN object and call its BUTTER method.
-h  = fdesign.lowpass(Fpass, Fstop, Apass, Astop, 1000);
+h  = fdesign.lowpass(Fpass, Fstop, Apass, Astop, eeg.sr);
 Hd = design(h, 'butter', 'MatchExactly', match);
 
 % Carry out the filtering
