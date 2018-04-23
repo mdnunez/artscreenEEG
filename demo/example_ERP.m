@@ -60,7 +60,7 @@ fprintf('%%Baseline the data 100 ms before stimulus onset...\n');
 % Calculate the ERP 
 fprintf('%%Calculate the ERP by averaging ''good'' baselined trials (for only ''good'' channels)\n');
 [goodchans, goodtrials] = goodbad(eeg);
-erp = mean(baselined(1151:1350, goodchans, goodtrials));
+erp = mean(baselined(1151:1350, goodchans, goodtrials),3); %Mean must be taken across the trial dimension
 
 fprintf('%%Plot the visual ERP\n');
 figure;
