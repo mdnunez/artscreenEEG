@@ -67,6 +67,7 @@ figure;
 plotx(-99:1000,erp);
 ylims = get(gca,'YLim');
 lhandle = line([1 1],get(gca,'YLim'));
+set(gca,'YLim',ylims);
 set(lhandle,'LineStyle','--','Color','r','LineWidth',2);
 xlabel('Time after stimulus onset (ms)');
 ylabel('Amplitude (Microvolts)');
