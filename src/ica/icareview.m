@@ -445,7 +445,7 @@ drawnow;
             end
             set(trialaxes,'ColorOrder',colororder);
             
-            cortplotx(trialaxes,xlabs,plotdata);
+            plotx(trialaxes,xlabs,plotdata);
             
             ylim(trialaxes,[min(min(plotdata))-chansep/4 max(max(plotdata))+chansep/4]);
             xlim(trialaxes,[0 xlabs(end)]);
@@ -491,7 +491,7 @@ drawnow;
         set(trialaxes,'ColorOrder',colororder);
         
         erpplotdata=erpdata-erpsep*ones(nsamps,1)*(1:ncomps);
-        cortplotx(trialaxes,xlabs,erpplotdata);
+        plotx(trialaxes,xlabs,erpplotdata);
         
         ylim(trialaxes,[min(min(erpplotdata))-erpsep/4 max(max(erpplotdata))+erpsep/4]);
         xlim(trialaxes,[0 xlabs(end)]);

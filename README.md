@@ -1,7 +1,7 @@
 <img src="./extra/logo.png" width="128">
 
 # artscreenEEG
-### Version 0.12.3
+### Version 0.12.4
 
 **Authors: Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine**
 
@@ -82,4 +82,4 @@ Please submit issues and associated pull requests. All .m code contributors will
 artscreenEEG is licensed under the GNU General Public License v3.0 and written by Michael D. Nunez, Cort Horton, Siyi Deng, William Winter, and Ramesh Srinivasan from the Human Neuroscience Lab at the University of California, Irvine.
 
 ### Version
-The newest version of artscreenEEG is 0.12.3 indicating that artscreenEEG is still being developed (version 0)
+The newest version of artscreenEEG is 0.12.4 indicating that artscreenEEG is still being developed (version 0)
