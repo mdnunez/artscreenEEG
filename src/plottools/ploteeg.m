@@ -43,6 +43,7 @@ function ploteeg(datain,varargin)
 %  01/10/18      Michael Nunez              Add markers
 %  02/13/18      Michael Nunez             Printing description of keys available
 %  02/14/18      Michael Nunez           Add channel labels and varargin for plots
+%  05/17/18      Michael Nunez                Use of cortplotxalt()
 
 %To do:
 % 1) Export markers
@@ -83,7 +84,7 @@ spacing = [0:(nchans-1)]*spacer;
 matspacing = repmat(spacing,[nsamps 1]);
 
 time = (epochtime*(plotepoch-1)+xtick):xtick:(epochtime*plotepoch);
-cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
+cortplotxalt(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
 set(gca,'YTick',spacing(plotchans),'YTickLabel',chanlabels(plotchans));
 set(gca,'YLim',[spacing(plotchans(1))-spacer*2 spacing(plotchans(end))+spacer])
 xlabel('Time (sec)');
@@ -126,7 +127,7 @@ end
         end
         xtick = 1/datain.sr; 
         time = (epochtime*(plotepoch-1)+xtick):xtick:(epochtime*plotepoch);
-        cortplotx(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
+        cortplotxalt(time,squeeze(datain.data(:,plotchans,plotepoch))+matspacing(:,1:length(plotchans)),'custom', chanlabels(plotchans), varargin{:});
         set(gca,'YTick',spacing(plotchans),'YTickLabel',chanlabels(plotchans));
         set(gca,'YLim',[spacing(plotchans(1))-spacer*2 spacing(plotchans(end))+spacer])
         xlabel('Time (sec)');
