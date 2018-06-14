@@ -20,6 +20,7 @@
 %   Date           Programmers               Description of change
 %   ====        =================            =====================
 %  04/23/18       Michael Nunez                 Original code
+%  06/13/18       Michael Nunez                Fixed baselined index
 
 %% Initial
 sub = 'subject1';
@@ -60,7 +61,7 @@ fprintf('%%Baseline the data 100 ms before stimulus onset...\n');
 % Calculate the ERP 
 fprintf('%%Calculate the ERP by averaging ''good'' baselined trials (for only ''good'' channels)\n');
 [goodchans, goodtrials] = goodbad(eeg);
-erp = mean(baselined(1151:1350, goodchans, goodtrials),3); %Mean must be taken across the trial dimension
+erp = mean(baselined(1151:2250, goodchans, goodtrials),3); %Mean must be taken across the trial dimension
 
 fprintf('%%Plot the visual ERP\n');
 figure;

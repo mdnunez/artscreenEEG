@@ -4,7 +4,7 @@ function [data rate info] = regi(file)
 %
 % REGI reads data from EGI (egi, hnl) .RAW files
 
-% Copyright (C) 2015 Michael D. Nunez, <mdnunez1@uci.edu>
+% Copyright (C) 2006 William Winter
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
