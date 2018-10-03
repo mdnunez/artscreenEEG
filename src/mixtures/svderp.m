@@ -17,13 +17,13 @@
 %    erpwind - the window to average the data (calculate the ERP).
 %              Default: [1:size(datain.data,1)]
 %
-%    baseline - window to calculate the baseline of the ERP
-%               Default: [] (no baseline)
+%    baseline - subset window to calculate the baseline of the ERP
+%               Default: 1:100 (first 100 milliseconds of erpwind)
 %
 %    erptrials - Trial index to calculate erp
 %                Default: All non-artifact trials
 %
-%    ncomps-  the number of components to solve for. Default: nchans
+%    ncomps-  the number of components to solve for. Default: 5
 %
 %    fftfreq- the max frequency to calculate for the component amplitude
 %             spectra.  Default: 50
@@ -31,10 +31,19 @@
 %    badchans - channels that are not zeroed out but should be considered
 %               bad and excluded from the SVDERP.
 %
+%    Fpass - Lowpass filter passband (Hz), Default: 10 Hz
+%
+%    Fstop - Lowpass filter stopband (Hz), Default: 20 Hz
+%
+%    Apass - Lowpass filter passband, no greater than _ attenuation (dB), Default; 1 dB
+%
+%    Astop - Lowpass filter stopband, at least _ attenuation (dB), Default: 10 dB
+%   
 %    saveUSV - Save U S V matrices from the singular-value decompositon
+%              Also save filter parameters
 %                    
 %
-% Copyright (C) 2017 Michael D. Nunez, <mdnunez1@uci.edu>
+% Copyright (C) 2018 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -56,15 +65,17 @@ function datain = svderp(datain,varargin)
 %   ====        =================            =====================
 %  05/01/17       Michael Nunez          Converted from icasegdata.m
 %  05/18/17       Michael Nunez    saveUSV flag and better description
+%  10/03/18       Michael Nunez        Add filtering options
 
 
 if nargin < 1; help svderp; return; end;
 
 % Parse inputs;
-[~,erpwind,baseline,erptrials,ncomps,fftfreq,badchans,saveUSV]=...
+[~,erpwind,baseline,erptrials,ncomps,fftfreq,badchans,Fpass,Fstop,Apass,Astop,saveUSV]=...
     parsevar(varargin,'erpwind',1:size(datain.data,1),...
-        'baseline',[],'erptrials',1:size(datain.data,3),'ncomps',[],...
-        'fftfreq',50,'badchans',[],'saveUSV',0);
+        'baseline',1:100,'erptrials',1:size(datain.data,3),'ncomps',5,...
+        'fftfreq',50,'badchans',[],'Fpass',10,'Fstop',20,...
+        'Apass',1,'Astop',10,'saveUSV',0);
 
 fprintf('SVD ERP used! Please cite:\n');
 fprintf('\n');
@@ -121,13 +132,30 @@ datain.cmp=zeros(nsamps,ncomps,ntrials);
 datain.sep=zeros(ncomps,nchans);
 datain.cpvars=zeros(1,ncomps);
 
-%Calculate the ERP
+%Filter the candidate EEG
 erptrials = intersect(goodtrials,erptrials);
 dataforerp = datain.data(erpwind,:,erptrials);
 dataforerp(:, setdiff(1:nchans,goodchans), :) = 0;
+
+
+% Lowpass filter the data
+
+% Construct an FDESIGN object and call its BUTTER method.
+h  = fdesign.lowpass(Fpass, Fstop, Apass, Astop, datain.sr);
+Hd = design(h, 'butter', 'MatchExactly', 'passband');
+
+% Carry out the filtering
+fprintf('Lowpass filtering the data at %d Hz...\n',Fpass);
+dataforerp =filtfilthd(Hd,dataforerp);
+
+%Remove baselines
+fprintf('Using baseline starting at sample %d and ending at sample %d...\n',baseline(1),baseline(end));
 if ~isempty(baseline)
     dataforerp = eegBaseline(dataforerp,baseline);
 end
+
+%Calculate the ERP
+fprintf('Calculating ERP and components...\n');
 erp = mean(dataforerp,3);
 
 %Use singular value decomposition
@@ -142,10 +170,15 @@ datain.mix=datain.sep;
 cmpsig=alldata*datain.sep';
 datain.cmp=cattoseg(cmpsig,nsamps);
 if saveUSV
-datain.svd.U = U;
-datain.svd.S = S;
-datain.svd.V = V;
+    datain.svd.U = U(:,1:ncomps);
+    datain.svd.S = S(1:ncomps,1:ncomps);
+    datain.svd.V = V(:,1:ncomps);
+    datain.svd.filter.Fpass = Fpass;
+    datain.svd.filter.Fstop = Fstop;
+    datain.svd.filter.Apass = Apass;
+    datain.svd.filter.Astop = Astop;
 end
+
 
 disp('Getting percent of variance that each component accounts for...');
 cpvars=diag(S.^2)/sum(diag(S.^2))*100;

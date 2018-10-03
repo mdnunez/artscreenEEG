@@ -21,15 +21,22 @@
 % automatically put into the edit box. Any other trial can also be plotted
 % by replacing the number in the edit box and pressing 'Enter'.
 %
-% Clicking 'Good', 'Unsure', or 'Artifact' will automatically advance to
-% the next undecided component. Review ends when all components have been
-% evaluated.
+% Optional Arguments: 
 %
-% Part 3 of artscreenEEG's basic data cleaning functions:
-%    artscreen.m => icasegdata.m => icareview.m => icatochan.m (optional)
+%
+%    Fpass - Lowpass filter passband (Hz), Default: No filter
+%            Recommended: 10 Hz
+%
+%    Fstop - Lowpass filter stopband (Hz), Default: 20 Hz
+%
+%    Apass - Lowpass filter passband, no greater than _ attenuation (dB), Default; 1 dB
+%
+%    Astop - Lowpass filter stopband, at least _ attenuation (dB), Default: 10 dB
+%   
+%
 %
 % Copyright (C) 2013 Cort Horton, <chorton@uci.edu>
-% Copyright (C) 2016 Michael D. Nunez, <mdnunez1@uci.edu>
+% Copyright (C) 2018 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -45,16 +52,36 @@
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-function datain = cmpreview(datain)
+function datain = cmpreview(datain,varargin)
 
-% VERSION HISTORY:
-%     1.0 - converted from icareview.m by Michael Nunez
+%% Record of Revisions
+%   Date           Programmers               Description of change
+%   ====        =================            =====================
+%  05/01/17       Michael Nunez          Converted from icareview.m
+%  10/03/18       Michael Nunez        Add filtering options
+
+
+if nargin < 1; help svderp; return; end;
+
+% Parse inputs;
+[~,Fpass,Fstop,Apass,Astop]=...
+    parsevar(varargin,'Fpass',[],'Fstop',20,'Apass',1,'Astop',10);
 
 if nargin < 1; help cmpreview; return; end;
 
 if isfield(datain,'data') && ~isfield(datain,'cmp');
     datain.cmp=datain.data;
     datain=rmfield(datain,'data');
+end
+
+if ~isempty(Fpass),
+    % Construct an FDESIGN object and call its BUTTER method.
+    h  = fdesign.lowpass(Fpass, Fstop, Apass, Astop, datain.sr);
+    Hd = design(h, 'butter', 'MatchExactly', 'passband');
+
+    % Carry out the filtering
+    fprintf('Lowpass filtering the data at %d Hz...\n',Fpass);
+    datain.cmp =filtfilthd(Hd,datain.cmp);
 end
 
 % Get required variables

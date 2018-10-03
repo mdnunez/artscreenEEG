@@ -9,7 +9,8 @@ function [newdata baselines] = eegBaseline(data,wind)
 %
 %Outputs:  newdata = baselined data
 %          baselines = Means used to shift data at each channel and trial
-%
+
+
 % Copyright (C) 2015 Michael D. Nunez, <mdnunez1@uci.edu>
 %
 % This program is free software: you can redistribute it and/or modify
