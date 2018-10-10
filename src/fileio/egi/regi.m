@@ -25,6 +25,8 @@ function [data rate info] = regi(file)
 %   2006           Bill Winter                  Original code
 %   3/31/15        Michael Nunez    Fixed ability to handle multiple events
 %   11/09/15       Michael Nunez       added event = [] if no event present
+%   10/10/18       Michael Nunez        Add try loop to avoid attempting to
+%                                          save events with strange names
 
 %Currently untest for .raw files with no events
 %Please track your changes!
@@ -43,7 +45,11 @@ fclose(fid);                                % close file
 if ~isempty(eventlabs)
     event = struct;
     for m = 1:nevent
-        event.(eventlabs(m,:)) = data(n+m,:);
+        try
+            event.(eventlabs(m,:)) = data(n+m,:);
+        catch
+            fprintf('regi cannot import event name %s \n',eventlabs(m,:));
+        end
     end
     %event = struct(event,data(n+1:n+nevent,:)); % separate event data
     data(n+1:n+nevent,:) = [];
